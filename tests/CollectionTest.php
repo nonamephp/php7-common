@@ -204,4 +204,21 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
 		$collection2 = unserialize($serializedCollection);
 		$this->assertEquals($collection1, $collection2);
 	}
+
+	/**
+	 * @covers Collection::__set, Collection::__get, Collection::__isset, Collection::__unset
+	 */
+	public function testMagicMethods()
+	{
+		$collection = new Collection;
+
+		$collection['key1'] = 'value1';
+
+		$this->assertTrue($collection->has('key1'));
+		$this->assertEquals($collection->get('key1'), 'value1');
+		$this->assertEquals($collection['key1'], 'value1');
+
+		unset($collection['key1']);
+		$this->assertFalse($collection->has('key1'));
+	}
 }
