@@ -1,0 +1,28 @@
+{
+    "name": "nonamephp/noname-common",
+    "description": "A collection of PHP 7 libraries",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Clint Tyler",
+            "email": "ctyler@cdtwebsolutions.com"
+        }
+    ],
+    "keywords": ["noname", "nonamephp", "common", "collection"],
+    "require": {
+        "php": ">=7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Noname\\Common\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Noname\\Common\\": "tests"
+        }
+    }
+}
