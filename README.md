@@ -7,6 +7,7 @@ A collection of common libraries for PHP 7
 
 ##### Methods
 
+* `__construct(array $data)` Create Collection
 * `set($key, $value)` Add an item
 * `get($key, $default = null)` Get value of item; Returns $default if item doesn't exist
 * `has($key) : bool` Check if item exists
@@ -19,3 +20,10 @@ A collection of common libraries for PHP 7
 * `values() : array` Get item values
 * `all() : array` Alias for `toArray()`
 * `toArray() : array` Returns collection as an array
+
+#### \Noname\Common\Validator
+
+##### Methods
+
+* `__construct($data, $rules)` Create Validator
+* `validate() : bool` Validate data based on supplied rules
