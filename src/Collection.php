@@ -4,6 +4,7 @@ namespace Noname\Common;
 use ArrayAccess;
 use Countable;
 use IteratorAggregate;
+use Serializable;
 use JsonSerializable;
 
 /**
@@ -11,7 +12,7 @@ use JsonSerializable;
  *
  * @package Noname\Common
  */
-class Collection implements Countable, ArrayAccess, IteratorAggregate, JsonSerializable
+class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializable, JsonSerializable
 {
 	/**
 	 * Array storage for collected items.
@@ -220,5 +221,18 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, JsonSeria
 	function jsonSerialize()
 	{
 		return $this->toArray();
+	}
+
+	///////////////////////////////////
+	// Serializable Methods
+
+	public function serialize()
+	{
+		return serialize($this->items);
+	}
+
+	public function unserialize($serialized)
+	{
+		$this->items = unserialize($serialized);
 	}
 }

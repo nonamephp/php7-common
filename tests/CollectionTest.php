@@ -188,4 +188,20 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
 		$json = json_encode($this->collection);
 		$this->assertEquals(json_decode($json, true), $this->collection->toArray());
 	}
+
+	/**
+	 * @covers Collection::serialize, Collection::unserialize
+	 */
+	public function testSerialize()
+	{
+		$data = [
+			'key1' => 'value1',
+			'key2' => 'value2'
+		];
+
+		$collection1 = new Collection($data);
+		$serializedCollection = serialize($collection1);
+		$collection2 = unserialize($serializedCollection);
+		$this->assertEquals($collection1, $collection2);
+	}
 }
