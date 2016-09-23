@@ -23,7 +23,21 @@ A collection of common libraries for PHP 7
 
 #### \Noname\Common\Validator
 
+    <?php
+    use \Noname\Common\Validator;
+    $values = ['email' => 'john.doe@example.org'];
+    $rules = ['email' => 'email'];
+    $validator = new Validator($values, $rules);
+    $valid = $validator->validate();
+    if(!$valid){
+        print_r($validator->getErrors());
+    }
+
 ##### Methods
 
-* `__construct($data, $rules)` Create Validator
+* `__construct(array $data, array $rules, array $settings = [])` Create Validator
+    * $data : array
+    * $rules : array
+    * $settings : array
 * `validate() : bool` Validate data based on supplied rules
+* `getErrors() : array` Return validation errors
