@@ -3,15 +3,7 @@
 
 A collection of common libraries for PHP 7
 
-#### Collection
-
-Basic usage example. 
-
-    <?php
-    $data = ['customer_id' => 100, 'email' => 'john.doe@example.org'];
-    $collection = new \Noname\Common\Collection($data);
-    $customer_id = $collection->get('customer_id');  // @return 100
-    $email = $collection->get('email'); // @return john.doe@example.org
+#### \Noname\Common\Collection
 
 ##### Methods
 

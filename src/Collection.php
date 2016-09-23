@@ -4,13 +4,14 @@ namespace Noname\Common;
 use ArrayAccess;
 use Countable;
 use IteratorAggregate;
+use JsonSerializable;
 
 /**
  * Collection
  *
  * @package Noname\Common
  */
-class Collection implements Countable, ArrayAccess, IteratorAggregate
+class Collection implements Countable, ArrayAccess, IteratorAggregate, JsonSerializable
 {
 	/**
 	 * Array storage for collected items.
@@ -20,6 +21,8 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate
 	protected $items = [];
 
 	/**
+	 * Create collection with optional items.
+	 *
 	 * @param array $items
 	 */
 	public function __construct(array $items = [])
@@ -28,7 +31,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate
 	}
 
 	/**
-	 * Adds an item to the collection.
+	 * Add an item to the collection.
 	 *
 	 * @param string $key
 	 * @param mixed $value
@@ -39,7 +42,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate
 	}
 
 	/**
-	 * Gets an item from the collection. Returns $default if item cannot be found.
+	 * Get an item from the collection. Returns $default if item cannot be found.
 	 *
 	 * @param string $key
 	 * @param mixed $default
@@ -54,7 +57,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate
 	}
 
 	/**
-	 * Gets and deletes an item from the collection.
+	 * Pluck an item from the collection. Returns $default if item cannot be found.
 	 *
 	 * @param string $key
 	 * @param mixed $default
@@ -153,7 +156,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate
 	}
 
 	/**
-	 * Destroys the collection by deleting all of the items.
+	 * Delete all items in collection.
 	 */
 	public function destroy()
 	{
@@ -161,7 +164,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate
 	}
 
 	/**
-	 * Gets collection as an array.
+	 * Get collection as an array.
 	 *
 	 * @return array
 	 */
@@ -189,7 +192,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate
 	}
 
 	///////////////////////////////////
-	// Array Access Methods
+	// ArrayAccess Methods
 
 	public function offsetExists($offset)
 	{
@@ -209,5 +212,13 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate
 	public function offsetUnset($offset)
 	{
 		return $this->delete($offset);
+	}
+
+	///////////////////////////////////
+	// JsonSerializable Methods
+
+	function jsonSerialize()
+	{
+		return $this->toArray();
 	}
 }
