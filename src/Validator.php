@@ -54,7 +54,6 @@ class Validator
 		'array' => 'validateArray',
 		'obj' => 'validateObject',
 		'object' => 'validateObject',
-		'class' => 'validateClass',
 		'closure' => 'validateClosure',
 		'callable' => 'validateCallable',
 		'email' => 'validateEmail',
@@ -158,7 +157,7 @@ class Validator
 	 * @param array $rule
 	 * @return bool
 	 */
-	private function validateType($type, $value, array $rule) : bool
+	public function validateType($type, $value, array $rule = []) : bool
 	{
 		$type = strtolower($type);
 		if(isset($this->validateTypeMethodMap[$type])){
@@ -285,7 +284,7 @@ class Validator
 	 */
 	private function validateAlphaNumeric($value, array $rule) : bool
 	{
-		return ctype_alnum($value);
+		return is_string($value) && ctype_alnum($value);
 	}
 
 	/**
@@ -297,7 +296,7 @@ class Validator
 	 */
 	private function validateAlpha($value, array $rule) : bool
 	{
-		return ctype_alpha($value);
+		return is_string($value) && ctype_alpha($value);
 	}
 
 	/**

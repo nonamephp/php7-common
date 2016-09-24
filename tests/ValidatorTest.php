@@ -3,71 +3,95 @@ namespace Noname\Common;
 
 class ValidatorTest extends \PHPUnit_Framework_TestCase
 {
-	///////////////////////////////////
+    protected $resource;
+    protected $nullValues;
+    protected $booleanValues;
+    protected $stringValues;
+    protected $integerValues;
+    protected $numericValues;
+    protected $numericStringValues;
+    protected $floatValues;
+    protected $alphaNumericValues;
+    protected $alphaValues;
+    protected $arrayValues;
+    protected $objectValues;
+    protected $closureValues;
+    protected $resourceValues;
+    protected $scalarValues;
+    protected $nonScalarValues;
+    protected $emailValues;
+    protected $ipv4Values;
+    protected $ipv6Values;
+    protected $ipValues;
+
+    protected function setUp()
+    {
+        // Create resource/stream
+        $this->resource = fopen(__DIR__ . '/fixtures/resource.txt', 'r');
+
+        // Set values for each data type
+        $this->nullValues = [null];
+        $this->booleanValues = [true, false];
+        $this->stringValues = ['Hello, World!'];
+        $this->integerValues = [1, 0, -1];
+        $this->numericValues = array_merge($this->integerValues, [0x539, 0b10100111001]);
+        $this->numericStringValues = ['1.0', '1'];
+        $this->floatValues = [1.0, 1e7];
+        $this->alphaNumericValues = ['abc', '123', 'abc123'];
+        $this->alphaValues = ['abc'];
+        $this->arrayValues = [['foo' => 'bar'], [1, 2, 3], []];
+        $this->objectValues = [new \stdClass, new class{}, (object)[]];
+        $this->closureValues = [function(){}];
+        $this->resourceValues = [$this->resource];
+        $this->scalarValues = array_merge($this->booleanValues, $this->stringValues, $this->integerValues, $this->numericValues, $this->numericStringValues, $this->floatValues, $this->alphaNumericValues, $this->alphaValues);
+        $this->nonScalarValues = array_merge($this->arrayValues, $this->objectValues, $this->closureValues, $this->resourceValues, $this->nullValues);
+        $this->emailValues = ['john.doe@example.org', 'jane.doe+test@example.org'];
+        $this->ipv4Values = ['127.0.0.1', '8.8.8.8'];
+        $this->ipv6Values = ['::1', '2001:0db8:85a3:0000:0000:8a2e:0370:7334'];
+        $this->ipValues = array_merge($this->ipv4Values, $this->ipv6Values);
+    }
+
+    protected function tearDown()
+    {
+        fclose($this->resource);
+    }
+
+    ///////////////////////////////////
 	// Tests
 
 	public function testValidateNull()
 	{
-		$valid = [
-			'key1' => null,
-		];
+        $validator = new Validator();
 
-		$invalid = [
-			'key1' => true,
-			'key2' => false,
-			'key3' => 100,
-			'key4' => new \stdClass,
-			'key5' => [],
-			'key6' => 'Hello, World!'
-		];
+        foreach($this->nullValues as $value){
+            $this->assertTrue($validator->validateType('null', $value));
+        }
 
-		$rules = [
-			'key1' => 'null',
-			'key2' => 'null',
-			'key3' => 'null',
-			'key4' => 'null',
-			'key5' => 'null',
-			'key6' => 'null',
-		];
+        // Grab all scalar and non-scalar values to test against
+        $values = array_merge($this->scalarValues, $this->nonScalarValues);
 
-		// Validate valid data
-		$validator1 = new Validator($valid, $rules);
-		$this->assertTrue($validator1->validate());
-
-		// Validate invalid data
-		$validator2 = new Validator($invalid, $rules);
-		$this->assertFalse($validator2->validate());
+        // Remove any strict null values (found in non-scalar values array)
+        $nullKeys = array_keys($values, null, true);
+        foreach($nullKeys as $index){
+            unset($values[$index]);
+        }
+        foreach($values as $value){
+            $this->assertFalse($validator->validateType('null', $value));
+        }
 	}
 
 	public function testValidateBoolean()
 	{
-		$valid = [
-			'key1' => true,
-			'key2' => false
-		];
+        $validator = new Validator();
 
-		$invalid = [
-			'key1' => 'true',
-			'key2' => 'false',
-			'key3' => 1,
-			'key4' => 'Hello, World!',
-			'key5' => 0
-		];
+        foreach($this->booleanValues as $value){
+            $this->assertTrue($validator->validateType('bool', $value));
+        }
 
-		$rules = [
-			'key1' => 'bool',
-			'key2' => 'bool',
-			'key3' => 'bool',
-			'key4' => 'bool'
-		];
-
-		// Validate valid data
-		$validator1 = new Validator($valid, $rules);
-		$this->assertTrue($validator1->validate());
-
-		// Validate invalid data
-		$validator2 = new Validator($invalid, $rules);
-		$this->assertFalse($validator2->validate());
+        $nonBooleanValues = array_merge(array_diff($this->scalarValues, $this->booleanValues), $this->nonScalarValues);
+        foreach($nonBooleanValues as $value){
+            $this->assertFalse($validator->validateType('bool', $value));
+        }
 	}
 
 	/**
@@ -75,36 +99,15 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testValidateScalar()
 	{
-		$valid = [
-			'key1' => true,
-			'key2' => false,
-			'key3' => 1,
-			'key4' => 0,
-			'key5' => 'Hello, World!',
-			'key6' => 1.0
-		];
+        $validator = new Validator();
 
-		$invalid = [
-			'key1' => ['foo' => 'bar'],
-			'key2' => new \stdClass
-		];
+        foreach($this->scalarValues as $value){
+            $this->assertTrue($validator->validateType('scalar', $value));
+        }
 
-		$rules = [
-			'key1' => 'scalar',
-			'key2' => 'scalar',
-			'key3' => 'scalar',
-			'key4' => 'scalar',
-			'key5' => 'scalar',
-			'key6' => 'scalar'
-		];
-
-		// Validate valid data
-		$validator1 = new Validator($valid, $rules);
-		$this->assertTrue($validator1->validate());
-
-		// Validate invalid data
-		$validator2 = new Validator($invalid, $rules);
-		$this->assertFalse($validator2->validate());
+        foreach($this->nonScalarValues as $value){
+            $this->assertFalse($validator->validateType('scalar', $value));
+        }
 	}
 
 	/**
@@ -112,34 +115,17 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testValidateString()
 	{
-		$valid = [
-			'key1' => 'Hello, World!',
-			'key2' => '',
-			'key3' => '100',
-			'key4' => json_encode(['foo' => 'bar'])
-		];
+        $validator = new Validator();
 
-		$invalid = [
-			'key1' => true,
-			'key2' => null,
-			'key3' => 100,
-			'key4' => new \stdClass
-		];
+        $stringValues = array_merge($this->stringValues, $this->numericStringValues, $this->alphaNumericValues, $this->alphaValues);
+        foreach($stringValues as $value){
+            $this->assertTrue($validator->validateType('str', $value));
+        }
 
-		$rules = [
-			'key1' => 'string',
-			'key2' => 'string',
-			'key3' => 'string',
-			'key4' => 'string'
-		];
-
-		// Validate valid data
-		$validator1 = new Validator($valid, $rules);
-		$this->assertTrue($validator1->validate());
-
-		// Validate invalid data
-		$validator2 = new Validator($invalid, $rules);
-		$this->assertFalse($validator2->validate());
+        $nonStringValues = array_merge(array_diff($this->scalarValues, $stringValues), $this->nonScalarValues);
+        foreach($nonStringValues as $value){
+            $this->assertFalse($validator->validateType('str', $value));
+        }
 	}
 
 	/**
@@ -147,31 +133,16 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testValidateInteger()
 	{
-		$valid = [
-			'key1' => 1,
-			'key2' => 0,
-			'key3' => -1,
-		];
+        $validator = new Validator();
 
-		$invalid = [
-			'key1' => '1',
-			'key2' => 1.0,
-			'key3' => true,
-		];
+        foreach($this->integerValues as $value){
+            $this->assertTrue($validator->validateType('int', $value));
+        }
 
-		$rules = [
-			'key1' => 'int',
-			'key2' => 'int',
-			'key3' => 'int',
-		];
-
-		// Validate valid data
-		$validator1 = new Validator($valid, $rules);
-		$this->assertTrue($validator1->validate());
-
-		// Validate invalid data
-		$validator2 = new Validator($invalid, $rules);
-		$this->assertFalse($validator2->validate());
+        $nonIntegerValues = array_merge(array_diff($this->scalarValues, $this->numericValues), $this->nonScalarValues);
+        foreach($nonIntegerValues as $value){
+            $this->assertFalse($validator->validateType('int', $value));
+        }
 	}
 
 	/**
@@ -179,31 +150,18 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testValidateNumeric()
 	{
-		$valid = [
-			'key1' => 1,
-			'key2' => '1',
-			'key3' => 1.0,
-		];
+        $validator = new Validator();
 
-		$invalid = [
-			'key1' => true,
-			'key2' => 'Hello, World!',
-			'key3' => ['foo' => 'bar']
-		];
+        $numericValues = array_merge($this->numericValues, $this->numericStringValues, $this->floatValues);
+        foreach($numericValues as $value){
+            $this->assertTrue($validator->validateType('num', $value));
+        }
 
-		$rules = [
-			'key1' => 'num',
-			'key2' => 'num',
-			'key3' => 'num',
-		];
-
-		// Validate valid data
-		$validator1 = new Validator($valid, $rules);
-		$this->assertTrue($validator1->validate());
-
-		// Validate invalid data
-		$validator2 = new Validator($invalid, $rules);
-		$this->assertFalse($validator2->validate());
+        // '123' is part of $this->alphaNumericValues which contains non-numeric values that need to be tested against
+        $nonNumericValues = array_merge(array_diff($this->scalarValues, $numericValues, ['123']), $this->nonScalarValues);
+        foreach($nonNumericValues as $value){
+            $this->assertFalse($validator->validateType('num', $value));
+        }
 	}
 
 	/**
@@ -211,28 +169,16 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testValidateFloat()
 	{
-		$valid = [
-			'key1' => 1.0,
-			'key2' => 1e7, // Scientific notation
-		];
+        $validator = new Validator();
 
-		$invalid = [
-			'key1' => 1,
-			'key2' => '1.0'
-		];
+        foreach($this->floatValues as $value){
+            $this->assertTrue($validator->validateType('float', $value));
+        }
 
-		$rules = [
-			'key1' => 'float',
-			'key2' => 'float',
-		];
-
-		// Validate valid data
-		$validator1 = new Validator($valid, $rules);
-		$this->assertTrue($validator1->validate());
-
-		// Validate invalid data
-		$validator2 = new Validator($invalid, $rules);
-		$this->assertFalse($validator2->validate());
+        $nonFloatValues = array_merge(array_diff($this->scalarValues, $this->floatValues), $this->nonScalarValues);
+        foreach($nonFloatValues as $value){
+            $this->assertFalse($validator->validateType('float', $value));
+        }
 	}
 
 	/**
@@ -240,32 +186,19 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testValidateAlphaNumeric()
 	{
-		$valid = [
-			'key1' => 'abc123',
-			'key2' => '123abc'
-		];
+        $validator = new Validator();
 
-		$invalid = [
-			'key1' => 'abc',
-			'key2' => '123',
-			'key3' => 123,
-			'key4' => 'abc 123',
-		];
+        foreach($this->alphaNumericValues as $value){
+            $this->assertTrue($validator->validateType('alnum', $value));
+        }
 
-		$rules = [
-			'key1' => 'alnum',
-			'key2' => 'alnum',
-			'key3' => 'alnum',
-			'key4' => 'alnum',
-		];
-
-		// Validate valid data
-		$validator1 = new Validator($valid, $rules);
-		$this->assertTrue($validator1->validate());
-
-		// Validate invalid data
-		$validator2 = new Validator($invalid, $rules);
-		$this->assertFalse($validator2->validate());
+        $nonAlphaNumericValues = array_merge(
+            array_diff($this->scalarValues, $this->alphaNumericValues, $this->alphaValues, $this->numericStringValues),
+            $this->nonScalarValues
+        );
+        foreach($nonAlphaNumericValues as $value){
+            $this->assertFalse($validator->validateType('alnum', $value));
+        }
 	}
 
 	/**
@@ -273,7 +206,16 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testValidateAlpha()
 	{
-		// @todo
+        $validator = new Validator();
+
+        foreach($this->alphaValues as $value){
+            $this->assertTrue($validator->validateType('alpha', $value));
+        }
+
+        $nonAlphaValues = array_merge(array_diff($this->scalarValues, $this->alphaValues), $this->nonScalarValues);
+        foreach($nonAlphaValues as $value){
+            $this->assertFalse($validator->validateType('alpha', $value));
+        }
 	}
 
 	/**
@@ -281,7 +223,16 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testValidateArray()
 	{
-		// @todo
+        $validator = new Validator();
+
+        foreach($this->arrayValues as $value){
+            $this->assertTrue($validator->validateType('array', $value));
+        }
+
+        $nonArrayValues = array_merge(array_udiff($this->nonScalarValues, $this->arrayValues, function($a, $b){ return $a <=> $b; }), $this->scalarValues);
+        foreach($nonArrayValues as $value){
+            $this->assertFalse($validator->validateType('array', $value));
+        }
 	}
 
 	/**
@@ -289,31 +240,35 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testValidateObject()
 	{
-		// @todo
+        $validator = new Validator();
+
+        foreach($this->objectValues as $value){
+            $this->assertTrue($validator->validateType('object', $value));
+        }
+
+        $nonObjectValues = array_merge(array_udiff($this->nonScalarValues, array_merge($this->objectValues, $this->closureValues), function($a, $b){ return $a <=> $b; }), $this->scalarValues);
+        foreach($nonObjectValues as $index => $value){
+           $this->assertFalse($validator->validateType('object', $value));
+        }
 	}
 
 	/**
-	 * @covers Validator::validateClass
-	 */
-	public function testValidateClass()
-	{
-		// @todo
-	}
-
-	/**
-	 * @covers Validator::validateClosure
+	 * @covers Validator::validateClosure, Validator::validateCallable
 	 */
 	public function testValidateClosure()
 	{
-		// @todo
-	}
+        $validator = new Validator();
 
-	/**
-	 * @covers Validator::validateCallable
-	 */
-	public function testValidateCallable()
-	{
-		// @todo
+        foreach($this->closureValues as $value){
+            $this->assertTrue($validator->validateType('closure', $value));
+            $this->assertTrue($validator->validateType('callable', $value));
+        }
+
+        $nonClosureValues = array_merge(array_udiff($this->nonScalarValues, array_merge($this->closureValues), function($a, $b){ return $a <=> $b; }), $this->scalarValues);
+        foreach($nonClosureValues as $index => $value){
+            $this->assertFalse($validator->validateType('closure', $value));
+            $this->assertFalse($validator->validateType('callable', $value));
+        }
 	}
 
 	/**
@@ -321,15 +276,16 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testValidateEmail()
 	{
-		// @todo
-	}
+        $validator = new Validator();
 
-	/**
-	 * @covers Validator::validateDate
-	 */
-	public function testValidateDate()
-	{
-		// @todo
+        foreach($this->emailValues as $value){
+            $this->assertTrue($validator->validateType('email', $value));
+        }
+
+        $nonEmailValues = array_merge($this->scalarValues, $this->nonScalarValues, $this->ipValues);
+        foreach($nonEmailValues as $index => $value){
+            $this->assertFalse($validator->validateType('email', $value));
+        }
 	}
 
 	/**
@@ -337,6 +293,15 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testValidateIP()
 	{
-		// @todo
+        $validator = new Validator();
+
+        foreach($this->ipValues as $value){
+            $this->assertTrue($validator->validateType('ip', $value));
+        }
+
+        $nonIPValues = array_merge($this->scalarValues, $this->nonScalarValues, $this->emailValues);
+        foreach($nonIPValues as $index => $value){
+            $this->assertFalse($validator->validateType('ip', $value));
+        }
 	}
 }
