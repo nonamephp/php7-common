@@ -40,4 +40,6 @@ A collection of common libraries for PHP 7
     * $rules : array
     * $settings : array
 * `validate() : bool` Validate data based on supplied rules
+* `hasErrors() : bool` Check if validator has errors
 * `getErrors() : array` Return validation errors
+* `validateType($type, $value, array $rule = []) : bool` Type-specific validator
