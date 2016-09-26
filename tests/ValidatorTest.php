@@ -59,6 +59,47 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     ///////////////////////////////////
 	// Tests
 
+	/**
+	 * @covers Validator::validate, Validator::hasErrors, Validator::getErrors
+	 */
+	public function testValidate()
+	{
+		// PASS
+		$passValues = [
+			'first_name' => 'John',
+			'last_name' => 'Doe',
+			'email' => 'john.doe@example.org'
+		];
+		$passRules = [
+			'first_name' => ['type' => 'string'],
+			'last_name' => ['type' => 'string'],
+			'email' => ['type' => 'email']
+		];
+		$passValidator = new Validator($passValues, $passRules);
+		$this->assertTrue($passValidator->validate());
+		$this->assertTrue(!$passValidator->hasErrors());
+		$this->assertTrue(empty($passValidator->getErrors()));
+
+		// FAIL
+		$failValues = [
+			'first_name' => 'John',
+			'last_name' => null,
+			'email' => 'john.doe@example.org'
+		];
+		$failRules = [
+			'first_name' => ['type' => 'string'],
+			'last_name' => ['type' => 'string'],
+			'email' => ['type' => 'email']
+		];
+		$failValidator = new Validator($failValues, $failRules);
+		$this->assertFalse($failValidator->validate());
+		$this->assertTrue($failValidator->hasErrors());
+		$this->assertArrayHasKey('last_name', $failValidator->getErrors());
+	}
+
+	/**
+	 * @covers Validator::validateNull
+	 */
 	public function testValidateNull()
 	{
         $validator = new Validator();
@@ -80,6 +121,9 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         }
 	}
 
+	/**
+	 * @covers Validator::validateBoolean
+	 */
 	public function testValidateBoolean()
 	{
         $validator = new Validator();

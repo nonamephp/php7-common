@@ -5,6 +5,7 @@ namespace Noname\Common;
  * Validator
  *
  * @package Noname\Common
+ * @since 0.2.0
  */
 class Validator
 {
@@ -57,7 +58,6 @@ class Validator
 		'closure' => 'validateClosure',
 		'callable' => 'validateCallable',
 		'email' => 'validateEmail',
-		'date' => 'validateDate',
 		'ip' => 'validateIP',
 		'ipv4' => 'validateIPv4',
 		'ipv6' => 'validateIPv6',
@@ -88,14 +88,19 @@ class Validator
 	{
 		if(!empty($this->rules)){
 			foreach($this->rules as $name => $rule){
-				if(isset($this->values[$name])){
+				if(array_key_exists($name, $this->values->toArray())){
 					if(is_string($rule)){
 						// Rebuild $rule into proper format
+						// e.g. 'email' -> ['type' => 'email']
 						$rule = ['type' => $rule];
 					}
-					if(!$this->validateType($rule['type'], $this->values[$name], $rule)){
-						// Error: Value for '%s' is invalid
-						$this->setError($name, "Value for '$name' is invalid. Expected {$rule['type']}.");
+					if(isset($rule['type'])){
+						if(!$this->validateType($rule['type'], $this->values[$name], $rule)){
+							// Error: Value for '%s' is invalid
+							$this->setError($name, "Value for '$name' is invalid. Expected {$rule['type']}.");
+						}
+					}else{
+						throw new \InvalidArgumentException("Invalid rule for '$name'");
 					}
 				}else{
 					if(isset($rule['required']) && $rule['required']){
@@ -309,20 +314,6 @@ class Validator
 	private function validateEmail($value, array $rule) : bool
 	{
 		return (bool) filter_var($value, FILTER_VALIDATE_EMAIL);
-
-	}
-
-	/**
-	 * Validate that $value is a valid date.
-	 *
-	 * @param mixed $value
-	 * @param array $rule
-	 * @return bool
-	 */
-	private function validateDate($value, array $rule) : bool
-	{
-		return (bool) false; // @todo
-
 	}
 
 	/**
