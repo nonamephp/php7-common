@@ -6,6 +6,33 @@ namespace Noname\Common;
  *
  * @package Noname\Common
  * @since 0.2.0
+ *
+ * @method static bool is(string $type, mixed $value) Checks if value passes as type
+ * @method static bool isNull(mixed $value) Checks if value is null
+ * @method static bool isBool(mixed $value) Checks if value is boolean
+ * @method static bool isBoolean(mixed $value) Checks if value is boolean
+ * @method static bool isScalar(mixed $value) Checks if value is scalar
+ * @method static bool isStr(mixed $value) Checks if value is string
+ * @method static bool isString(mixed $value) Checks if value is string
+ * @method static bool isInt(mixed $value) Checks if value is integer
+ * @method static bool isInteger(mixed $value) Checks if value is integer
+ * @method static bool isNum(mixed $value) Checks if value is numeric
+ * @method static bool isNumeric(mixed $value) Checks if value is numeric
+ * @method static bool isFloat(mixed $value) Checks if value is float
+ * @method static bool isDouble(mixed $value) Checks if value is double
+ * @method static bool isAlNum(mixed $value) Checks if value contains only alpha-numeric characters
+ * @method static bool isAlphaNumeric(mixed $value) Checks if value contains only alpha-numeric characters
+ * @method static bool isAlpha(mixed $value) Checks if value contains only alpha characters
+ * @method static bool isArr(mixed $value) Checks if value is an array
+ * @method static bool isArray(mixed $value) Checks if value is an array
+ * @method static bool isObj(mixed $value) Checks if value is an object
+ * @method static bool isObject(mixed $value) Checks if value is an object
+ * @method static bool isClosure(mixed $value) Checks if value is instance of \Closure
+ * @method static bool isCallable(mixed $value) Checks if value is callable
+ * @method static bool isEmail(mixed $value) Checks if value is valid email address
+ * @method static bool isIP(mixed $value) Checks if value is valid IPv4 or IPv6
+ * @method static bool isIPv4(mixed $value) Checks if value is valid IPv4
+ * @method static bool isIPv6(mixed $value) Checks if value is valid IPv6
  */
 class Validator
 {
@@ -18,11 +45,6 @@ class Validator
 	 * @var Collection
 	 */
 	private $rules;
-
-	/**
-	 * @var Collection
-	 */
-	private $settings;
 
 	/**
 	 * @var Collection
@@ -45,11 +67,10 @@ class Validator
 		'integer' => 'validateInteger',
 		'num' => 'validateNumeric',
 		'numeric' => 'validateNumeric',
-		'number' => 'validateNumeric',
 		'float' => 'validateFloat',
 		'double' => 'validateFloat',
 		'alnum' => 'validateAlphaNumeric',
-		'alphaNumeric' => 'validateAlphaNumeric',
+		'alphanumeric' => 'validateAlphaNumeric',
 		'alpha' => 'validateAlpha',
 		'arr' => 'validateArray',
 		'array' => 'validateArray',
@@ -68,15 +89,48 @@ class Validator
 	 *
 	 * @param array $values
 	 * @param array $rules
-	 * @param array $settings
 	 */
-	public function __construct(array $values = [], array $rules = [], array $settings = [])
+	public function __construct(array $values = [], array $rules = [])
 	{
 		// Create collections for datasets
 		$this->values = new Collection($values);
 		$this->rules = new Collection($rules);
-		$this->settings = new Collection($settings);
 		$this->errors = new Collection();
+	}
+
+	/**
+	 * Magic method to handle calls to undefined static methods.
+	 *
+	 * @param string $method
+	 * @param array $arguments
+	 * @throws \InvalidArgumentException, \BadMethodCallException
+	 * @return bool
+	 */
+	public static function __callStatic($method, $arguments)
+	{
+		// Split split method name into parts on each uppercased letter
+		$parts = preg_split('/(?=[A-Z])/', lcfirst($method));
+
+		$func = array_shift($parts);
+		$numArgs = count($arguments);
+
+		if($func == 'is'){
+			if(empty($parts)){
+				// Handle call to Validator::is($type, $value)
+				if($numArgs == 2){
+					list($type, $value) = $arguments;
+					return (new self())->validateType($type, $value);
+				}
+				throw new \InvalidArgumentException("Validator::is() expects exactly 2 parameters, $numArgs parameters were given.");
+			}else{
+				// Handle call to Validator::is{Type}($value)
+				$type = implode('', $parts);
+				return (new self())->validateType($type, $arguments[0]);
+			}
+		}
+
+		// Undefined method; Throw exception
+		throw new \BadMethodCallException("Validator::{$method}() not defined.");
 	}
 
 	/**
