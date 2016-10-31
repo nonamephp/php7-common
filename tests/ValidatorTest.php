@@ -23,6 +23,9 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     protected $ipv4Values;
     protected $ipv6Values;
     protected $ipValues;
+	protected $dateValues;
+	protected $timeValues;
+	protected $dateTimeValues;
 
     protected function setUp()
     {
@@ -49,6 +52,9 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->ipv4Values = ['127.0.0.1', '8.8.8.8'];
         $this->ipv6Values = ['::1', '2001:0db8:85a3:0000:0000:8a2e:0370:7334'];
         $this->ipValues = array_merge($this->ipv4Values, $this->ipv6Values);
+	    $this->dateValues = ['1969', '1970-01-01', 'January 1, 2016', '01/01/2016'];
+	    $this->timeValues = [1451606400, '10:00', '10:00:00', '10:00 AM', '10:00 PM'];
+	    $this->dateTimeValues = array_merge(['2016-01-01 12:35:00', '2016-01-01T10:35:00+02:00'], $this->dateValues, $this->timeValues);
     }
 
     protected function tearDown()
@@ -505,6 +511,48 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 				$validator->validateType('ip', $value) &&
 				$validator->validateType('ipv4', $value) &&
 				$validator->validateType('ipv6', $value)
+			);
+		}
+	}
+
+	/**
+	 * @covers Validator::validateDateTime, Validator::isDate, Validator::isDateTime
+	 */
+	public function testValidateDateTime()
+	{
+		$validator = new Validator();
+
+		// Validate date & time values
+		foreach($this->dateTimeValues as $value){
+			$this->assertTrue(
+				Validator::isDate($value) &&
+				$validator->validateType('date', $value) &&
+				$validator->validateType('datetime', $value)
+			);
+		}
+
+		// Validate date & time w/ format rule
+		$formatDateTime = [
+			'Ymd' => '20160101',
+			'Y-m-d' => '2016-01-01',
+			'Y-m-d H:i:s' => '2016-01-01 12:35:00',
+			'H:i:s' => '12:35:00',
+			'Y' => '2016'
+		];
+		foreach($formatDateTime as $format => $value){
+			$this->assertTrue(
+				$validator->validateType('date', $value, ['format' => $format]) &&
+				$validator->validateType('datetime', $value, ['format' => $format])
+			);
+		}
+
+		// Validate invalid date & time values
+		$nonDateTimeValues = array_merge($this->nonScalarValues, ['Hello World', null, true, false, '']);
+		foreach($nonDateTimeValues as $value){
+			$this->assertFalse(
+				Validator::isDate($value) &&
+				$validator->validateType('date', $value) &&
+				$validator->validateType('datetime', $value)
 			);
 		}
 	}

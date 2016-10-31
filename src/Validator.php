@@ -33,6 +33,8 @@ namespace Noname\Common;
  * @method static bool isIP(mixed $value) Checks if value is valid IPv4 or IPv6
  * @method static bool isIPv4(mixed $value) Checks if value is valid IPv4
  * @method static bool isIPv6(mixed $value) Checks if value is valid IPv6
+ * @method static bool isDate(mixed $value) Checks if value is date/datetime
+ * @method static bool isDateTime(mixed $value) Checks if value is date/datetime
  */
 class Validator
 {
@@ -82,6 +84,8 @@ class Validator
 		'ip' => 'validateIP',
 		'ipv4' => 'validateIPv4',
 		'ipv6' => 'validateIPv6',
+		'date' => 'validateDateTime',
+		'datetime' => 'validateDateTime',
 	];
 
 	/**
@@ -428,5 +432,37 @@ class Validator
 	private function validateCallable($value, array $rule) : bool
 	{
 		return is_callable($value);
+	}
+
+	/**
+	 * Validate that $value is a valid date/time.
+	 *
+	 * @param mixed $value
+	 * @param array $rule
+	 * @return bool
+	 */
+	private function validateDateTime($value, array $rule) : bool
+	{
+		if(!is_string($value) && !is_int($value)){
+			return false;
+		}
+
+		$value = (string) $value;
+
+		// Returns a timestamp on success, FALSE otherwise
+		if(($time = strtotime($value)) === false){
+			return false;
+		}
+
+		// Returns new \DateTime instance of success, FALSE otherwise
+		if(($date = date_create($value)) === false){
+			return false;
+		}
+
+		if(isset($rule['format'])){
+			return $date->format($rule['format']) == $value;
+		}
+
+		return true;
 	}
 }
