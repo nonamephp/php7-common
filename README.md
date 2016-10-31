@@ -61,15 +61,15 @@ Returns the count of all of the items in the collection.
 
 Returns an array containing keys for all of the items in the collection.
 
-###### `values() : array`
+##### `values() : array`
 
 Returns an array containing values for all of the items in the collection.
 
-###### `all() : array` 
+##### `all() : array` 
 
 Alias for `toArray()`.
 
-###### `toArray() : array` 
+##### `toArray() : array` 
 
 Returns all items in the collection as an associative array.
 
@@ -79,30 +79,32 @@ Use `Validator` to validate your data based on a set of rules.
 
 ##### Basic Example
 
-    <?php
-    use Noname\Common\Validator;
-    
-    // $data must be an associative array of user input
-    $data = [
-        'customer_id'    => 100,
-        'customer_email' => 'john.doe@example.org'
-    ];
-    
-    // Define a rule for each field you want to validate
-    $rules = [
-        'customer_id'    => 'int',  // customer_id MUST be an integer
-        'customer_email' => 'email' // customer_email MUST be an email address
-    ];
-    
-    // Create Validator
-    $validator = new Validator($data, $rules);
-    
-    // Validate the data based on the rules
-    if(!$validator->validate()){
-        // getErrors() will return an array of validation errors
-        $errors = $validator->getErrors();
-        // handle errors
-    }
+```php
+<?php
+use Noname\Common\Validator;
+
+// $data must be an associative array of user input
+$data = [
+    'customer_id'    => 100,
+    'customer_email' => 'john.doe@example.org'
+];
+
+// Define a rule for each field you want to validate
+$rules = [
+    'customer_id'    => 'int',  // customer_id MUST be an integer
+    'customer_email' => 'email' // customer_email MUST be an email address
+];
+
+// Create Validator
+$validator = new Validator($data, $rules);
+
+// Validate the data based on the rules
+if(!$validator->validate()){
+    // getErrors() will return an array of validation errors
+    $errors = $validator->getErrors();
+    // handle errors
+}
+```    
     
 #### Built-in Validation Types
 
@@ -143,35 +145,41 @@ Checks if validation has any errors.
 Returns an array of validation errors. 
 
 
-###### `static is($type, $value) : bool`
+##### `static is(string $type, mixed $value) : bool`
 
 Static method to check if `$value` is valid `$type`. You can pass any of the built-in validator types for `$type`.
 
-    <?php
-    use Noname\Common\Validator;
-    
-    Validator::is('string', 'Hello world!');
-    Validator::is('integer', 100);
+```php
+<?php
+use Noname\Common\Validator;
 
-##### `static is{Type}($value)`
+Validator::is('string', 'Hello world!');
+Validator::is('integer', 100);
+```
+
+##### `static is{Type}(mixed $value) : bool`
 
 Similar to `Validator:is()`, except type is passed in the method name.
 
-    <?php
-    use Noname\Common\Validator;
-    
-    Validator::isString('Hello world!');
-    Validator::isInteger(100);
+```php
+<?php
+use Noname\Common\Validator;
+
+Validator::isString('Hello world!');
+Validator::isInteger(100);
+```
     
 It's important to note that the type in the method name MUST start with an uppercased letter.
 
 To provide a quick example:
 
-    <?php
-    use Noname\Common\Validator;
-    
-    // This is not valid because 'string' starts with lowercased letter.
-    Validator::isstring('Hello world!');
-    
-    // This is valid because 'String' starts with uppercased letter.
-    Validator::isString('Hello world!');
+```php
+<?php
+use Noname\Common\Validator;
+
+// This is not valid because 'string' starts with lowercased letter.
+Validator::isstring('Hello world!');
+
+// This is valid because 'String' starts with uppercased letter.
+Validator::isString('Hello world!');
+ ```
