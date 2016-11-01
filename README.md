@@ -125,6 +125,7 @@ if(!$validator->validate()){
 * `ip` Validate that value is either of IPv4 or IPv6
 * `ipv4` Validate that value is IPv4
 * `ipv6` Validate that value is IPv6
+* `date`, `datetime` Validate that value is date/datetime
 
 #### Validator Methods
 
