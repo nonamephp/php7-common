@@ -77,7 +77,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
      */
     public function get($key, $default = null)
     {
-        if(isset($this->items[$key])){
+        if (isset($this->items[$key])) {
             return $this->items[$key];
         }
         return $default;
@@ -153,21 +153,21 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
     {
         $keyValue = $this->get($key);
 
-        if(in_array($operator, [null, '=', '=='])){
+        if (in_array($operator, [null, '=', '=='])) {
             return $keyValue == $value;
-        }elseif($operator == '==='){ // strict
+        } elseif ($operator == '===') { // strict
             return $keyValue === $value;
-        }elseif($operator == '>'){
+        } elseif ($operator == '>') {
             return $keyValue > $value;
-        }elseif($operator == '>='){
+        } elseif ($operator == '>=') {
             return $keyValue >= $value;
-        }elseif($operator == '<'){
+        } elseif ($operator == '<') {
             return $keyValue < $value;
-        }elseif($operator == '<='){
+        } elseif ($operator == '<=') {
             return $keyValue <= $value;
-        }elseif(in_array($operator, ['!=', '<>'])){
+        } elseif (in_array($operator, ['!=', '<>'])) {
             return $keyValue != $value;
-        }else{
+        } else {
             throw new \InvalidArgumentException('Invalid value supplied for $operator');
         }
     }
@@ -205,7 +205,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
 
     public function getIterator()
     {
-        foreach($this->items as $key => $value){
+        foreach ($this->items as $key => $value) {
             yield $key => $value;
         }
     }
@@ -244,7 +244,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
     ///////////////////////////////////
     // JsonSerializable Methods
 
-    function jsonSerialize()
+    public function jsonSerialize()
     {
         return $this->toArray();
     }
