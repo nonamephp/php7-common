@@ -20,8 +20,8 @@ namespace Noname\Common;
  * @method static bool isNumeric(mixed $value, array $rule = []) Checks if value is numeric
  * @method static bool isFloat(mixed $value, array $rule = []) Checks if value is float
  * @method static bool isDouble(mixed $value, array $rule = []) Checks if value is double
- * @method static bool isAlNum(mixed $value, array $rule = []) Checks if value contains only alpha-numeric characters
- * @method static bool isAlphaNumeric(mixed $value, array $rule = []) Checks if value contains only alpha-numeric characters
+ * @method static bool isAlNum(mixed $value, array $rule = []) Check for alpha-numeric characters only
+ * @method static bool isAlphaNumeric(mixed $value, array $rule = []) Check for alpha-numeric characters only
  * @method static bool isAlpha(mixed $value, array $rule = []) Checks if value contains only alpha characters
  * @method static bool isArr(mixed $value, array $rule = []) Checks if value is an array
  * @method static bool isArray(mixed $value, array $rule = []) Checks if value is an array
@@ -133,7 +133,7 @@ class Validator
                     }
                     return (new self())->validateType($type, $value, $rule);
                 }
-                throw new \InvalidArgumentException("Validator::is() expects 2 or 3 parameters, $numArgs parameters were given.");
+                throw new \InvalidArgumentException("Too many arguments passed to Validator::{$method}()");
             } else {
                 // Handle call to Validator::is{Type}($value [, $rule])
                 $type = implode('', $parts);
