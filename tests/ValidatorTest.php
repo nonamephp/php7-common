@@ -526,12 +526,13 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach($this->dateTimeValues as $value){
             $this->assertTrue(
                 Validator::isDate($value) &&
+                Validator::isDateTime($value) &&
                 $validator->validateType('date', $value) &&
                 $validator->validateType('datetime', $value)
             );
         }
 
-        // Validate date & time w/ format rule
+        // Validate date & time w/ valid format
         $formatDateTime = [
             'Ymd' => '20160101',
             'Y-m-d' => '2016-01-01',
@@ -541,6 +542,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         ];
         foreach($formatDateTime as $format => $value){
             $this->assertTrue(
+                Validator::isDate($value, ['format' => $format]) &&
+                Validator::isDateTime($value, ['format' => $format]) &&
                 $validator->validateType('date', $value, ['format' => $format]) &&
                 $validator->validateType('datetime', $value, ['format' => $format])
             );
@@ -551,8 +554,24 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach($nonDateTimeValues as $value){
             $this->assertFalse(
                 Validator::isDate($value) &&
+                Validator::isDateTime($value) &&
                 $validator->validateType('date', $value) &&
                 $validator->validateType('datetime', $value)
+            );
+        }
+
+        // Validate date & time w/ invalid format
+        $formatDateTime = [
+            'Y-m-d' => '20160101',
+            'Ymd' => '2016-01-01',
+            'm' => '2016'
+        ];
+        foreach($formatDateTime as $format => $value){
+            $this->assertFalse(
+                Validator::isDate($value, ['format' => $format]) &&
+                Validator::isDateTime($value, ['format' => $format]) &&
+                $validator->validateType('date', $value, ['format' => $format]) &&
+                $validator->validateType('datetime', $value, ['format' => $format])
             );
         }
     }
