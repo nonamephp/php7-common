@@ -133,6 +133,30 @@ if(!$validator->validate()){
 
 Create instance of `Validator`.
 
+##### `addValue(string $name, mixed $value)` 
+
+Add value.
+
+##### `addValues(array $values)` 
+
+Add multiple values.
+
+##### `values() : array` 
+
+Returns an array of values.
+
+##### `addRule(string $name, mixed $rule)` 
+
+Add rules.
+
+##### `addRules(array $rules)` 
+
+Add multiple rules.
+
+##### `rules() : array` 
+
+Returns an array of rules.
+
 ##### `validate() : bool` 
 
 Validate the data based on the rules.
