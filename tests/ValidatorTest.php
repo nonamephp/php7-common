@@ -94,6 +94,50 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     // Tests
 
     /**
+     * @covers Validator::addValue, Validator::addValues, Validator::values
+     */
+    public function testAddValue()
+    {
+        $validator = new Validator();
+
+        // Add single value
+        $validator->addValue('a', 'b');
+
+        // Add multiple values
+        $validator->addValues(['b' => 'c', 'c' => 'd']);
+
+        // Get values from validator
+        $values = $validator->values();
+
+        // Assertions
+        $this->assertTrue(isset($values['a']) && $values['a'] == 'b');
+        $this->assertTrue(isset($values['b']) && $values['b'] == 'c');
+        $this->assertTrue(isset($values['c']) && $values['c'] == 'd');
+    }
+
+    /**
+     * @covers Validator::addRule, Validator::addRules, Validator::rules
+     */
+    public function testAddRule()
+    {
+        $validator = new Validator();
+
+        // Add single rule
+        $validator->addRule('a', 'int');
+
+        // Add multiple rules
+        $validator->addRules(['b' => 'str', 'c' => 'bool']);
+
+        // Get rules from validator
+        $rules = $validator->rules();
+
+        // Assertions
+        $this->assertTrue(isset($rules['a']) && $rules['a'] == 'int');
+        $this->assertTrue(isset($rules['b']) && $rules['b'] == 'str');
+        $this->assertTrue(isset($rules['c']) && $rules['c'] == 'bool');
+    }
+
+    /**
      * @covers Validator::validate, Validator::hasErrors, Validator::getErrors
      */
     public function testValidate()

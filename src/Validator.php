@@ -148,6 +148,72 @@ class Validator
     }
 
     /**
+     * Add value.
+     *
+     * @param string $name
+     * @param mixed $value
+     */
+    public function addValue(string $name, $value)
+    {
+        $this->values->set($name, $value);
+    }
+
+    /**
+     * Add multiple values.
+     *
+     * @param array $values
+     */
+    public function addValues(array $values)
+    {
+        foreach ($values as $name => $value) {
+            $this->values->set($name, $value);
+        }
+    }
+
+    /**
+     * Get values.
+     *
+     * @return array
+     */
+    public function values() : array
+    {
+        return $this->values->toArray();
+    }
+
+    /**
+     * Add rule.
+     *
+     * @param string $name
+     * @param mixed $rule
+     */
+    public function addRule(string $name, $rule)
+    {
+        $this->rules->set($name, $rule);
+    }
+
+    /**
+     * Add multiple rules.
+     *
+     * @param array $rules
+     */
+    public function addRules(array $rules)
+    {
+        foreach ($rules as $name => $rule) {
+            $this->rules->set($name, $rule);
+        }
+    }
+
+    /**
+     * Get rules.
+     *
+     * @return array
+     */
+    public function rules() : array
+    {
+        return $this->rules->toArray();
+    }
+
+    /**
      * Validate the values based on the rules.
      *
      * @return bool
