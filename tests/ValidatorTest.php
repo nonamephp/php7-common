@@ -176,6 +176,26 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers Validator::validateAny, Validator::isAny
+     */
+    public function testValidateAny()
+    {
+        $validator = new Validator();
+
+        // No matter the value, this validator will return true
+        $values = array_merge($this->scalarValues, $this->nonScalarValues);
+        foreach ($values as $value) {
+            $this->assertTrue(
+                Validator::isAny($value) &&
+                Validator::is('*', $value) &&
+                Validator::is('any', $value) &&
+                $validator->validateType('*', $value) &&
+                $validator->validateType('any', $value)
+            );
+        }
+    }
+
+    /**
      * @covers Validator::validateNull
      */
     public function testValidateNull()
@@ -673,6 +693,97 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $validator->validateType('date', $value, ['format' => $format]) &&
                 $validator->validateType('datetime', $value, ['format' => $format])
             );
+        }
+    }
+
+    /**
+     * Test 'required' setting for rules.
+     */
+    public function testRequiredValue()
+    {
+        $values1 = [
+            'test1' => 'hello world',
+            'test2' => 'foo bar',
+            'test3' => 'hello',
+        ];
+
+        $values2 = [
+            'test1' => 'hello world',
+            'test3' => 'hello'
+        ];
+
+        $values3 = [
+            'test1' => 'hello world'
+        ];
+
+        $rules = [
+            'test1' => ['type' => 'string'],
+            'test2' => ['type' => 'string', 'required' => false],
+            'test3' => ['type' => 'string']
+        ];
+
+        $validator1 = new Validator($values1, $rules);
+        $this->assertTrue($validator1->validate());
+
+        $validator2 = new Validator($values2, $rules);
+        $this->assertTrue($validator2->validate());
+
+        $validator3 = new Validator($values3, $rules);
+        $this->assertFalse($validator3->validate());
+    }
+
+    /**
+     * @covers Validator::validate
+     */
+    public function testCustomValidatorRule()
+    {
+        $rules = [
+            'test1' => function ($name, $value, $validator) {
+                $expected = 100;
+                $valid = $value == $expected;
+                if (!$valid) {
+                    $validator->setError($name, "'$value' does not equal '$expected'");
+                }
+                return $valid;
+            },
+            'test2' => [
+                'type' => 'any',
+                'validator' => function ($name, $value, $validator) {
+                    $expected = 100;
+                    $valid = $value == $expected;
+                    if (!$valid) {
+                        $validator->setError($name, "'$value' does not equal '$expected'");
+                    }
+                    return $valid;
+                }
+            ],
+            'test3' => [
+                'type' => 'string',
+                'validator' => function ($name, $value, $validator) {
+                    $expected = 'Hello, World!';
+                    $valid = $value == $expected;
+                    if (!$valid) {
+                        $validator->setError($name, "'$value' does not equal '$expected'");
+                    }
+                    return $valid;
+                }
+            ],
+        ];
+
+        $validator1 = new Validator(['test1' => 100, 'test2' => 100, 'test3' => 'Hello, World!'], $rules);
+        $this->assertTrue($validator1->validate());
+
+        $validator2 = new Validator(['test1' => 10, 'test2' => 10, 'test3' => 10], $rules);
+        $this->assertFalse($validator2->validate());
+        $errors = $validator2->getErrors();
+        foreach ($errors as $name => $err) {
+            if ($name == 'test1' || $name == 'test2') {
+                $this->assertEquals("'10' does not equal '100'", $err[0]);
+            } elseif ($name == 'test3') {
+                // Since test3 has type of 'string' the validator will make sure
+                // the value is a string before running the customer validator
+                $this->assertEquals("'10' is not valid string for 'test3'.", $err[0]);
+            }
         }
     }
 }
