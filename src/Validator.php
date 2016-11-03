@@ -8,6 +8,7 @@ namespace Noname\Common;
  * @since 0.2.0
  *
  * @method static bool is(string $type, mixed $value, array $rule = []) Checks if value passes as type
+ * @method static bool isAny(mixed $value, array $rule = []) Always returns true
  * @method static bool isNull(mixed $value, array $rule = []) Checks if value is null
  * @method static bool isBool(mixed $value, array $rule = []) Checks if value is boolean
  * @method static bool isBoolean(mixed $value, array $rule = []) Checks if value is boolean
@@ -41,24 +42,26 @@ class Validator
     /**
      * @var Collection
      */
-    private $values;
+    protected $values;
 
     /**
      * @var Collection
      */
-    private $rules;
+    protected $rules;
 
     /**
      * @var Collection
      */
-    private $errors;
+    protected $errors;
 
     /**
-     * Map of types to validate method names.
+     * Map built-in types to associated validate method
      *
      * @var array
      */
-    private $validateTypeMethodMap = [
+    protected $typeValidateFunctionMap = [
+        '*' => 'validateAny',
+        'any' => 'validateAny',
         'null' => 'validateNull',
         'bool' => 'validateBoolean',
         'boolean' => 'validateBoolean',
@@ -220,26 +223,52 @@ class Validator
      */
     public function validate() : bool
     {
-        if (!empty($this->rules)) {
+        if ($this->rules->count()) {
             foreach ($this->rules as $name => $rule) {
-                if (array_key_exists($name, $this->values->toArray())) {
-                    if (is_string($rule)) {
-                        // Rebuild $rule into proper format
-                        // e.g. 'email' -> ['type' => 'email']
-                        $rule = ['type' => $rule];
+                // Convert string/closure rules into proper rule format
+                if (is_string($rule)) {
+                    $rule = ['type' => $rule];
+                } elseif ($rule instanceof \Closure || is_callable($rule)) {
+                    // Rule uses closure/callable for validation
+                    $rule = ['type' => 'any', 'validator' => $rule];
+                }
+
+                // Make sure rule is formatted correctly
+                if (!is_array($rule) || !isset($rule['type'])) {
+                    throw new \InvalidArgumentException("Rule format for '$name' is invalid.");
+                }
+
+                // Value is required by default
+                if (!isset($rule['required'])) {
+                    $rule['required'] = true;
+                }
+
+                // Check if value exists
+                if ($value = $this->values->get($name, false)) {
+                    // Validate using type validators
+                    if (!$this->validateType($rule['type'], $value, $rule)) {
+                        $this->setError($name, "'$value' is not valid {$rule['type']} for '$name'.");
+                        continue;
                     }
-                    if (isset($rule['type'])) {
-                        if (!$this->validateType($rule['type'], $this->values[$name], $rule)) {
-                            // Error: Value for '%s' is invalid
-                            $this->setError($name, "Value for '$name' is invalid. Expected {$rule['type']}.");
+
+                    // Validate using closure/callable validator
+                    if (isset($rule['validator'])) {
+                        if ($rule['validator'] instanceof \Closure) {
+                            if (!$rule['validator']($name, $value, $this)) {
+                                $this->setError($name, "'$value' is not valid for '$name'.");
+                                continue;
+                            }
+                        } elseif (is_callable($rule['validator'])) {
+                            if (!call_user_func_array($rule['validator'], [$name, $value, $this])) {
+                                $this->setError($name, "'$value' is not valid for '$name'.");
+                                continue;
+                            }
                         }
-                    } else {
-                        throw new \InvalidArgumentException("Invalid rule for '$name'");
                     }
                 } else {
-                    if (isset($rule['required']) && $rule['required']) {
-                        // Error: Value for '%s' is required
-                        $this->setError($name, "Value for '$name' is required");
+                    if ($rule['required']) {
+                        $this->setError($name, "Value for '$name' is required.");
+                        continue;
                     }
                 }
             }
@@ -299,11 +328,22 @@ class Validator
     public function validateType($type, $value, array $rule = []) : bool
     {
         $type = strtolower($type);
-        if (isset($this->validateTypeMethodMap[$type])) {
-            return $this->{$this->validateTypeMethodMap[$type]}($value, $rule);
-        } else {
-            throw new \InvalidArgumentException("Type '$type' is not a valid rule type");
+        if (isset($this->typeValidateFunctionMap[$type])) {
+            return $this->{$this->typeValidateFunctionMap[$type]}($value, $rule);
         }
+        throw new \InvalidArgumentException("Type '$type' is not a valid rule type");
+    }
+
+    /**
+     * No validation is done. Always returns true.
+     *
+     * @param $value
+     * @param array $rule
+     * @return bool
+     */
+    protected function validateAny($value, array $rule = []) : bool
+    {
+        return true;
     }
 
     /**
@@ -313,7 +353,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateNull($value, array $rule = []) : bool
+    protected function validateNull($value, array $rule = []) : bool
     {
         return is_null($value);
     }
@@ -325,7 +365,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateBoolean($value, array $rule = []) : bool
+    protected function validateBoolean($value, array $rule = []) : bool
     {
         return is_bool($value);
     }
@@ -337,7 +377,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateScalar($value, array $rule = []) : bool
+    protected function validateScalar($value, array $rule = []) : bool
     {
         return is_scalar($value);
     }
@@ -349,7 +389,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateArray($value, array $rule = []) : bool
+    protected function validateArray($value, array $rule = []) : bool
     {
         return is_array($value);
     }
@@ -361,7 +401,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateObject($value, array $rule = []) : bool
+    protected function validateObject($value, array $rule = []) : bool
     {
         return is_object($value);
     }
@@ -373,7 +413,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateString($value, array $rule = []) : bool
+    protected function validateString($value, array $rule = []) : bool
     {
         return is_string($value);
     }
@@ -385,7 +425,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateInteger($value, array $rule = []) : bool
+    protected function validateInteger($value, array $rule = []) : bool
     {
         return is_int($value);
     }
@@ -397,7 +437,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateNumeric($value, array $rule = []) : bool
+    protected function validateNumeric($value, array $rule = []) : bool
     {
         return is_numeric($value);
     }
@@ -409,7 +449,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateFloat($value, array $rule = []) : bool
+    protected function validateFloat($value, array $rule = []) : bool
     {
         return is_float($value);
     }
@@ -421,7 +461,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateAlphaNumeric($value, array $rule = []) : bool
+    protected function validateAlphaNumeric($value, array $rule = []) : bool
     {
         return is_string($value) && ctype_alnum($value);
     }
@@ -433,7 +473,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateAlpha($value, array $rule = []) : bool
+    protected function validateAlpha($value, array $rule = []) : bool
     {
         return is_string($value) && ctype_alpha($value);
     }
@@ -445,7 +485,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateEmail($value, array $rule = []) : bool
+    protected function validateEmail($value, array $rule = []) : bool
     {
         return (bool) filter_var($value, FILTER_VALIDATE_EMAIL);
     }
@@ -457,7 +497,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateIP($value, array $rule = []) : bool
+    protected function validateIP($value, array $rule = []) : bool
     {
         return $this->validateIPv4($value, $rule) || $this->validateIPv6($value, $rule);
     }
@@ -469,7 +509,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateIPv4($value, array $rule = []) : bool
+    protected function validateIPv4($value, array $rule = []) : bool
     {
         return (bool) filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
     }
@@ -481,7 +521,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateIPv6($value, array $rule = []) : bool
+    protected function validateIPv6($value, array $rule = []) : bool
     {
         return (bool) filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
     }
@@ -493,7 +533,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateClosure($value, array $rule = []) : bool
+    protected function validateClosure($value, array $rule = []) : bool
     {
         return ($value instanceof \Closure);
     }
@@ -505,7 +545,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateCallable($value, array $rule = []) : bool
+    protected function validateCallable($value, array $rule = []) : bool
     {
         return is_callable($value);
     }
@@ -517,7 +557,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    private function validateDateTime($value, array $rule = []) : bool
+    protected function validateDateTime($value, array $rule = []) : bool
     {
         if (!is_string($value) && !is_int($value)) {
             return false;

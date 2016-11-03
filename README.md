@@ -108,6 +108,7 @@ if(!$validator->validate()){
     
 #### Built-in Validation Types
 
+* `*`, `any` Always pass validation for any data type
 * `null` Validate that value is null
 * `bool`, `boolean` Validate that value is boolean
 * `scalar` Validate that value is scalar (integer, float, string or boolean)
