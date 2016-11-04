@@ -317,6 +317,27 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $validator->validateType('string', $value)
             );
         }
+
+        // Test string rules
+        $min_length = ['min_length' => 1];
+        $max_length = ['max_length' => 3];
+        $allow_empty = ['allow_empty' => false];
+        $allow_null = ['allow_null' => true];
+        $equals = ['equals' => 'Hello, World!'];
+        $in = ['in' => ['hello', 'world', 'foo', 'bar']];
+
+        $this->assertTrue(Validator::isString('abc', array_merge($min_length, $max_length)));
+        $this->assertFalse(Validator::isString('', $min_length));
+        $this->assertFalse(Validator::isString('abcd', $max_length));
+        $this->assertTrue(Validator::isString(''));
+        $this->assertFalse(Validator::isString('', $allow_empty));
+        $this->assertFalse(Validator::isString(null));
+        $this->assertTrue(Validator::isString(null, $allow_null));
+        $this->assertTrue(Validator::isString('Hello, World!', $equals));
+        $this->assertFalse(Validator::isString('Hello World!', $equals));
+        $this->assertFalse(Validator::isString('foo', array_merge($equals, $in)));
+        $this->assertTrue(Validator::isString('foo', $in));
+        $this->assertFalse(Validator::isString('cat', $in));
     }
 
     /**

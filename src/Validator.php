@@ -415,7 +415,32 @@ class Validator
      */
     protected function validateString($value, array $rule = []) : bool
     {
-        return is_string($value);
+        $valid = is_string($value);
+
+        // Only one of 'equals' and 'in' will be evaluated, with 'equals' taking precedence
+        if (isset($rule['equals']) && is_string($rule['equals'])) {
+            $valid = $valid && $value == $rule['equals'];
+        } elseif (isset($rule['in']) && is_array($rule['in'])) {
+            $valid = $valid && in_array($value, $rule['in']);
+        }
+
+        if (isset($rule['allow_empty']) && $rule['allow_empty'] === false) {
+            $valid = $valid && !empty($value);
+        }
+
+        if (isset($rule['allow_null']) && $rule['allow_null'] === true) {
+            $valid = $valid || is_null($value);
+        }
+
+        if (isset($rule['min_length']) && is_numeric($rule['min_length']) && $rule['min_length'] > 0) {
+            $valid = $valid && (strlen($value) >= $rule['min_length']);
+        }
+
+        if (isset($rule['max_length']) && is_numeric($rule['max_length']) && $rule['max_length'] > 0) {
+            $valid = $valid && (strlen($value) <= $rule['max_length']);
+        }
+
+        return $valid;
     }
 
     /**
