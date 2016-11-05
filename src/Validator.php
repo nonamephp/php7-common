@@ -243,6 +243,9 @@ class Validator
                     $rule['required'] = true;
                 }
 
+                // Add key/name to $rule
+                $rule['name'] = $name;
+
                 // Check if value exists
                 if ($value = $this->values->get($name, false)) {
                     // Validate using type validators
@@ -328,9 +331,32 @@ class Validator
     public function validateType($type, $value, array $rule = []) : bool
     {
         $type = strtolower($type);
+
+        // Check for type[]
+        $arrayType = (substr($type, -2) == '[]');
+        if ($arrayType) {
+            $type = substr($type, 0, -2);
+        }
+
         if (isset($this->typeValidateFunctionMap[$type])) {
+            if ($arrayType) {
+                // Validate an array of values
+                $values = (array) $value;
+                foreach ($values as $index => $value) {
+                    if (!$this->{$this->typeValidateFunctionMap[$type]}($value, $rule)) {
+                        $this->setError($rule['name'], "'$value' failed to validate as '$type'");
+                    }
+                }
+
+                // Return true regardless of any errors to avoid default error
+                // that is set when this method returns false
+                return true;
+            }
+
+            // Validate the value
             return $this->{$this->typeValidateFunctionMap[$type]}($value, $rule);
         }
+
         throw new \InvalidArgumentException("Type '$type' is not a valid rule type");
     }
 

@@ -807,4 +807,34 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             }
         }
     }
+
+    /**
+     * Test type[] validation
+     */
+    public function testValidateArrayTypes()
+    {
+        $passValues = [
+            'strings' => $this->stringValues,
+            'integers' => $this->integerValues,
+            'emails' => $this->emailValues
+        ];
+
+        $failValues = [
+            'strings' => array_merge($this->stringValues, $this->integerValues),
+            'integers' => array_merge($this->integerValues, $this->stringValues, $this->emailValues),
+            'emails' => array_merge($this->emailValues, $this->stringValues, $this->integerValues)
+        ];
+
+        $rules = [
+            'strings' => 'string[]',
+            'integers' => 'int[]',
+            'emails' => 'email[]'
+        ];
+
+        $passValidator = new Validator($passValues, $rules);
+        $this->assertTrue($passValidator->validate());
+
+        $failValidator = new Validator($failValues, $rules);
+        $this->assertFalse($failValidator->validate());
+    }
 }

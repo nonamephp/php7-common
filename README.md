@@ -128,6 +128,8 @@ if(!$validator->validate()){
 * `ipv6` Validate that value is IPv6
 * `date`, `datetime` Validate that value is date/datetime
 
+**Hint:** You can add `[]` to the end of any type to validate an array of values.
+
 #### Validator Methods
 
 ##### `__construct(array $values, array $rules)`
