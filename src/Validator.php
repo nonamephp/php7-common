@@ -443,10 +443,11 @@ class Validator
     {
         $valid = is_string($value);
 
-        // Only one of 'equals' and 'in' will be evaluated, with 'equals' taking precedence
         if (isset($rule['equals']) && is_string($rule['equals'])) {
             $valid = $valid && $value == $rule['equals'];
-        } elseif (isset($rule['in']) && is_array($rule['in'])) {
+        }
+
+        if (isset($rule['in']) && is_array($rule['in'])) {
             $valid = $valid && in_array($value, $rule['in']);
         }
 
@@ -458,11 +459,11 @@ class Validator
             $valid = $valid || is_null($value);
         }
 
-        if (isset($rule['min_length']) && is_numeric($rule['min_length']) && $rule['min_length'] > 0) {
+        if (isset($rule['min_length']) && is_int($rule['min_length']) && $rule['min_length'] > 0) {
             $valid = $valid && (strlen($value) >= $rule['min_length']);
         }
 
-        if (isset($rule['max_length']) && is_numeric($rule['max_length']) && $rule['max_length'] > 0) {
+        if (isset($rule['max_length']) && is_int($rule['max_length']) && $rule['max_length'] > 0) {
             $valid = $valid && (strlen($value) <= $rule['max_length']);
         }
 
@@ -475,10 +476,47 @@ class Validator
      * @param mixed $value
      * @param array $rule
      * @return bool
+     * @throws \Exception
      */
     protected function validateInteger($value, array $rule = []) : bool
     {
-        return is_int($value);
+        $valid = is_int($value);
+
+        if (isset($rule['unsigned']) && $rule['unsigned'] === true) {
+            // Validate that int is unsigned
+            if ($valid = $valid && ($value > 0)) {
+                // Unsigned integer violation check
+                foreach (['>', '>=', '<', '<=', 'equals'] as $r) {
+                    if (isset($rule[$r]) && $rule[$r] < 0) {
+                        throw new \Exception("'$r' must be >= 0 for unsigned integers.");
+                    }
+                }
+            }
+        }
+
+        if (isset($rule['equals']) && is_int($rule['equals'])) {
+            $valid = $valid && $value == $rule['equals'];
+        }
+
+        if (isset($rule['in']) && is_array($rule['in'])) {
+            $valid = $valid && in_array($value, $rule['in']);
+        }
+
+        // Validate > or >=, with > getting priority over >=
+        if (isset($rule['>']) && is_int($rule['>'])) {
+            $valid = $valid && ($value > $rule['>']);
+        } elseif(isset($rule['>=']) && is_int($rule['>='])) {
+            $valid = $valid && ($value >= $rule['>=']);
+        }
+
+        // Validate < or <=, with < getting priority over <=
+        if (isset($rule['<']) && is_int($rule['<'])) {
+            $valid = $valid && ($value < $rule['<']);
+        } elseif(isset($rule['<=']) && is_int($rule['<='])) {
+            $valid = $valid && ($value <= $rule['<=']);
+        }
+
+        return $valid;
     }
 
     /**

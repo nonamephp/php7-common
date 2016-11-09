@@ -319,25 +319,24 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         }
 
         // Test string rules
-        $min_length = ['min_length' => 1];
-        $max_length = ['max_length' => 3];
-        $allow_empty = ['allow_empty' => false];
-        $allow_null = ['allow_null' => true];
-        $equals = ['equals' => 'Hello, World!'];
-        $in = ['in' => ['hello', 'world', 'foo', 'bar']];
+        $str_min_length = ['min_length' => 1];
+        $str_max_length = ['max_length' => 3];
+        $str_allow_empty = ['allow_empty' => false];
+        $str_allow_null = ['allow_null' => true];
+        $str_equals = ['equals' => 'Hello, World!'];
+        $str_in = ['in' => ['hello', 'world', 'foo', 'bar']];
 
-        $this->assertTrue(Validator::isString('abc', array_merge($min_length, $max_length)));
-        $this->assertFalse(Validator::isString('', $min_length));
-        $this->assertFalse(Validator::isString('abcd', $max_length));
+        $this->assertTrue(Validator::isString('abc', array_merge($str_min_length, $str_max_length)));
+        $this->assertFalse(Validator::isString('', $str_min_length));
+        $this->assertFalse(Validator::isString('abcd', $str_max_length));
         $this->assertTrue(Validator::isString(''));
-        $this->assertFalse(Validator::isString('', $allow_empty));
+        $this->assertFalse(Validator::isString('', $str_allow_empty));
         $this->assertFalse(Validator::isString(null));
-        $this->assertTrue(Validator::isString(null, $allow_null));
-        $this->assertTrue(Validator::isString('Hello, World!', $equals));
-        $this->assertFalse(Validator::isString('Hello World!', $equals));
-        $this->assertFalse(Validator::isString('foo', array_merge($equals, $in)));
-        $this->assertTrue(Validator::isString('foo', $in));
-        $this->assertFalse(Validator::isString('cat', $in));
+        $this->assertTrue(Validator::isString(null, $str_allow_null));
+        $this->assertTrue(Validator::isString('Hello, World!', $str_equals));
+        $this->assertFalse(Validator::isString('Hello World!', $str_equals));
+        $this->assertTrue(Validator::isString('foo', $str_in));
+        $this->assertFalse(Validator::isString('cat', $str_in));
     }
 
     /**
@@ -369,6 +368,32 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $validator->validateType('integer', $value)
             );
         }
+
+        // Test integer rules
+        $int_unsigned = ['unsigned' => true];
+        $int_gt = ['>' => 3];
+        $int_gteq = ['>=' => 3];
+        $int_lt = ['<' => 10];
+        $int_lteq = ['<=' => 10];
+        $int_equals = ['equals' => 5];
+        $int_in = ['in' => [1, 2, 3]];
+
+        $this->assertTrue(Validator::isInteger(3, $int_unsigned));
+        $this->assertFalse(Validator::isInteger(-1, $int_unsigned));
+        $this->assertTrue(Validator::isInteger(4, $int_gt));
+        $this->assertFalse(Validator::isInteger(3, $int_gt));
+        $this->assertTrue(Validator::isInteger(3, $int_gteq));
+        $this->assertFalse(Validator::isInteger(2, $int_gteq));
+        $this->assertTrue(Validator::isInteger(3, $int_lt));
+        $this->assertFalse(Validator::isInteger(10, $int_lt));
+        $this->assertTrue(Validator::isInteger(10, $int_lteq));
+        $this->assertFalse(Validator::isInteger(11, $int_lteq));
+        $this->assertTrue(Validator::isInteger(5, array_merge($int_gt, $int_lt)));
+        $this->assertTrue(Validator::isInteger(5, array_merge($int_gteq, $int_lteq)));
+        $this->assertTrue(Validator::isInteger(5, $int_equals));
+        $this->assertFalse(Validator::isInteger(1, $int_equals));
+        $this->assertTrue(Validator::isInteger(2, $int_in));
+        $this->assertFalse(Validator::isInteger(4, $int_in));
     }
 
     /**
