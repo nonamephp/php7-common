@@ -248,6 +248,13 @@ class Validator
 
                 // Check if value exists
                 if ($value = $this->values->get($name, false)) {
+                    if (isset($rule['extends'])) {
+                        // Validate extended type
+                        if (!$this->validateType($rule['extends'], $value, $rule)) {
+                            $this->setError($name, "'$value' is not valid {$rule['extends']} for '$name'.");
+                            continue;
+                        }
+                    }
                     // Validate using type validators
                     if (!$this->validateType($rule['type'], $value, $rule)) {
                         $this->setError($name, "'$value' is not valid {$rule['type']} for '$name'.");
