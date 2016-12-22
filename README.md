@@ -119,8 +119,7 @@ if(!$validator->validate()){
 * `alnum`, `alphanumeric` Validate that value is alpha-numeric only
 * `alpha` Validate that value is alpha only
 * `arr`, `array` Validate that value is array
-* `obj`, `object` Validate that value is object
-* `closure` Validate that value is instance of `\Closure`
+* `object` Validate that value is object
 * `callable` Validate that value is callable
 * `email` Validate that value is valid email address
 * `ip` Validate that value is either of IPv4 or IPv6
@@ -135,6 +134,31 @@ if(!$validator->validate()){
 ##### `__construct(array $values, array $rules)`
 
 Create instance of `Validator`.
+
+##### `addType(string $typeName, array $typeRule)` 
+
+Add custom validator type.
+
+```php
+<?php
+use Noname\Common\Validator;
+
+$values = ['a' => 2];
+$rules = ['a' => ['type' => 'equals_2']];
+$validator = new Validator();
+$validator->addType('equals_2', [
+    'extends' => 'numeric',
+    'validator' => function ($value, $rule, $validator) {
+        $valid = $value === 2;
+        if (!$valid) {
+            $validator->setError($rule['name'], 'Value does not equal 2');
+        }
+        return $valid;
+    }
+]);
+$validator->validate();
+```
+
 
 ##### `addValue(string $name, mixed $value)` 
 
