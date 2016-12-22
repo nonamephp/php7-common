@@ -71,16 +71,28 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
     /**
      * Get an item from the collection. Returns $default if item cannot be found.
      *
-     * @param string $key
+     * Passing an array of item keys for the value of $key will result in multiple
+     * items being returned. Keys that are missing from the collection will be
+     * returned with a value of $default.
+     *
+     * @param mixed $key
      * @param mixed $default
      * @return mixed Will return $default if cannot find item
      */
     public function get($key, $default = null)
     {
-        if (isset($this->items[$key])) {
-            return $this->items[$key];
+        if (is_array($key)) {
+            // Get multiple items by their key
+            $items = [];
+            foreach ($key as $k) {
+                $items[$k] = isset($this->items[$k]) ? $this->items[$k] : $default;
+            }
+
+            return $items;
+        } else {
+            // Get a single item by its key
+            return isset($this->items[$key]) ? $this->items[$key] : $default;
         }
-        return $default;
     }
 
     /**
