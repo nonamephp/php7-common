@@ -26,9 +26,13 @@ Create instance of `Collection`.
 
 Add an item to the collection. If `$key` already exists in the collection it will be overwritten.
 
-##### `get(string $key, mixed $default = null)`
+##### `get(string|array $key, mixed $default = null)`
 
-Return the value of an item from the collection. If `$key` doesn't exist in the collection then `$default` will be returned.
+Get an item from the collection. Returns `$default` if item cannot be found.
+
+Passing an array of item keys for the value of `$key` will result in multiple
+items being returned. Keys that are missing from the collection will be
+returned with a value of `$default`.
 
 ##### `has(string $key) : bool` 
 
