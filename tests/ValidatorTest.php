@@ -94,6 +94,37 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     // Tests
 
     /**
+     * @covers Validator::addType
+     */
+    public function testAddType()
+    {
+        $rules = [
+            'a' => 'equals_2',
+            'b' => 'equals_2',
+        ];
+
+        // Pass validation
+        $validator1 = new Validator(['a' => 2, 'b' => 2], $rules);
+        $validator1->addType('equals_2', [
+            'extends' => 'numeric',
+            'validator' => function ($value, $rule, $validator) {
+                return $value === 2;
+            }
+        ]);
+        $this->assertTrue($validator1->validate());
+
+        // Fail validation
+        $validator2 = new Validator(['a' => 2, 'b' => 3], $rules);
+        $validator2->addType('equals_2', [
+            'extends' => 'numeric',
+            'validator' => function ($value, $rule, $validator) {
+                return $value === 2;
+            }
+        ]);
+        $this->assertFalse($validator2->validate());
+    }
+
+    /**
      * @covers Validator::addValue, Validator::addValues, Validator::values
      */
     public function testAddValue()
@@ -188,9 +219,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 Validator::isAny($value) &&
                 Validator::is('*', $value) &&
-                Validator::is('any', $value) &&
-                $validator->validateType('*', $value) &&
-                $validator->validateType('any', $value)
+                Validator::is('any', $value)
             );
         }
     }
@@ -205,8 +234,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($this->nullValues as $value) {
             $this->assertTrue(
                 Validator::isNull($value) &&
-                Validator::is('null', $value) &&
-                $validator->validateType('null', $value)
+                Validator::is('null', $value)
             );
         }
 
@@ -221,8 +249,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($values as $value) {
             $this->assertFalse(
                 Validator::isNull($value) &&
-                Validator::is('null', $value) &&
-                $validator->validateType('null', $value)
+                Validator::is('null', $value)
             );
         }
     }
@@ -239,9 +266,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 Validator::isBool($value) &&
                 Validator::isBoolean($value) &&
                 Validator::is('bool', $value) &&
-                Validator::is('boolean', $value) &&
-                $validator->validateType('bool', $value) &&
-                $validator->validateType('boolean', $value)
+                Validator::is('boolean', $value)
             );
         }
 
@@ -251,9 +276,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 Validator::isBool($value) &&
                 Validator::isBoolean($value) &&
                 Validator::is('bool', $value) &&
-                Validator::is('boolean', $value) &&
-                $validator->validateType('bool', $value) &&
-                $validator->validateType('boolean', $value)
+                Validator::is('boolean', $value)
             );
         }
     }
@@ -268,16 +291,14 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($this->scalarValues as $value) {
             $this->assertTrue(
                 Validator::isScalar($value) &&
-                Validator::is('scalar', $value) &&
-                $validator->validateType('scalar', $value)
+                Validator::is('scalar', $value)
             );
         }
 
         foreach ($this->nonScalarValues as $value) {
             $this->assertFalse(
                 Validator::isScalar($value) &&
-                Validator::is('scalar', $value) &&
-                $validator->validateType('scalar', $value)
+                Validator::is('scalar', $value)
             );
         }
     }
@@ -300,9 +321,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 Validator::isStr($value) &&
                 Validator::isString($value) &&
                 Validator::is('str', $value) &&
-                Validator::is('string', $value) &&
-                $validator->validateType('str', $value) &&
-                $validator->validateType('string', $value)
+                Validator::is('string', $value)
             );
         }
 
@@ -312,9 +331,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 Validator::isStr($value) &&
                 Validator::isString($value) &&
                 Validator::is('str', $value) &&
-                Validator::is('string', $value) &&
-                $validator->validateType('str', $value) &&
-                $validator->validateType('string', $value)
+                Validator::is('string', $value)
             );
         }
     }
@@ -331,9 +348,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 Validator::isInt($value) &&
                 Validator::isInteger($value) &&
                 Validator::is('int', $value) &&
-                Validator::is('integer', $value) &&
-                $validator->validateType('int', $value) &&
-                $validator->validateType('integer', $value)
+                Validator::is('integer', $value)
             );
         }
 
@@ -343,9 +358,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 Validator::isInt($value) &&
                 Validator::isInteger($value) &&
                 Validator::is('int', $value) &&
-                Validator::is('integer', $value) &&
-                $validator->validateType('int', $value) &&
-                $validator->validateType('integer', $value)
+                Validator::is('integer', $value)
             );
         }
     }
@@ -363,9 +376,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 Validator::isNum($value) &&
                 Validator::isNumeric($value) &&
                 Validator::is('num', $value) &&
-                Validator::is('numeric', $value) &&
-                $validator->validateType('num', $value) &&
-                $validator->validateType('numeric', $value)
+                Validator::is('numeric', $value)
             );
         }
 
@@ -379,9 +390,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 Validator::isNum($value) &&
                 Validator::isNumeric($value) &&
                 Validator::is('num', $value) &&
-                Validator::is('numeric', $value) &&
-                $validator->validateType('num', $value) &&
-                $validator->validateType('numeric', $value)
+                Validator::is('numeric', $value)
             );
         }
     }
@@ -396,9 +405,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($this->floatValues as $value) {
             $this->assertTrue(
                 Validator::isFloat($value) &&
-                Validator::isDouble($value) &&
-                $validator->validateType('float', $value) &&
-                $validator->validateType('double', $value)
+                Validator::isDouble($value)
             );
         }
 
@@ -406,9 +413,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($nonFloatValues as $value) {
             $this->assertFalse(
                 Validator::isFloat($value) &&
-                Validator::isDouble($value) &&
-                $validator->validateType('float', $value) &&
-                $validator->validateType('double', $value)
+                Validator::isDouble($value)
             );
         }
     }
@@ -423,9 +428,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($this->alphaNumericValues as $value) {
             $this->assertTrue(
                 Validator::isAlNum($value) &&
-                Validator::isAlphaNumeric($value) &&
-                $validator->validateType('alnum', $value),
-                $validator->validateType('alphanumeric', $value)
+                Validator::isAlphaNumeric($value)
             );
         }
 
@@ -436,9 +439,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($nonAlphaNumericValues as $value) {
             $this->assertFalse(
                 Validator::isAlNum($value) &&
-                Validator::isAlphaNumeric($value) &&
-                $validator->validateType('alnum', $value),
-                $validator->validateType('alphanumeric', $value)
+                Validator::isAlphaNumeric($value)
             );
         }
     }
@@ -452,16 +453,14 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
         foreach ($this->alphaValues as $value) {
             $this->assertTrue(
-                Validator::isAlpha($value) &&
-                $validator->validateType('alpha', $value)
+                Validator::isAlpha($value)
             );
         }
 
         $nonAlphaValues = array_merge(array_diff($this->scalarValues, $this->alphaValues), $this->nonScalarValues);
         foreach ($nonAlphaValues as $value) {
             $this->assertFalse(
-                Validator::isAlpha($value) &&
-                $validator->validateType('alpha', $value)
+                Validator::isAlpha($value)
             );
         }
     }
@@ -476,9 +475,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($this->arrayValues as $value) {
             $this->assertTrue(
                 Validator::isArr($value) &&
-                Validator::isArray($value) &&
-                $validator->validateType('arr', $value) &&
-                $validator->validateType('array', $value)
+                Validator::isArray($value)
             );
         }
 
@@ -488,9 +485,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($nonArrayValues as $value) {
             $this->assertFalse(
                 Validator::isArr($value) &&
-                Validator::isArray($value) &&
-                $validator->validateType('arr', $value) &&
-                $validator->validateType('array', $value)
+                Validator::isArray($value)
             );
         }
     }
@@ -504,10 +499,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
         foreach ($this->objectValues as $value) {
             $this->assertTrue(
-                Validator::isObj($value) &&
-                Validator::isObject($value) &&
-                $validator->validateType('obj', $value) &&
-                $validator->validateType('object', $value)
+                Validator::isObject($value)
             );
         }
 
@@ -523,27 +515,21 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
         foreach ($nonObjectValues as $index => $value) {
             $this->assertFalse(
-                Validator::isObj($value) &&
-                Validator::isObject($value) &&
-                $validator->validateType('obj', $value) &&
-                $validator->validateType('object', $value)
+                Validator::isObject($value)
             );
         }
     }
 
     /**
-     * @covers Validator::validateClosure, Validator::validateCallable
+     * @covers Validator::validateCallable
      */
-    public function testValidateClosure()
+    public function testValidateCallable()
     {
         $validator = new Validator();
 
         foreach ($this->closureValues as $value) {
             $this->assertTrue(
-                Validator::isClosure($value) &&
-                Validator::isCallable($value) &&
-                $validator->validateType('closure', $value) &&
-                $validator->validateType('callable', $value)
+                Validator::isCallable($value)
             );
         }
 
@@ -559,10 +545,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
         foreach ($nonClosureValues as $index => $value) {
             $this->assertFalse(
-                Validator::isClosure($value) &&
-                Validator::isCallable($value) &&
-                $validator->validateType('closure', $value) &&
-                $validator->validateType('callable', $value)
+                Validator::isCallable($value)
             );
         }
     }
@@ -576,16 +559,14 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
         foreach ($this->emailValues as $value) {
             $this->assertTrue(
-                Validator::isEmail($value),
-                $validator->validateType('email', $value)
+                Validator::isEmail($value)
             );
         }
 
         $nonEmailValues = array_merge($this->scalarValues, $this->nonScalarValues, $this->ipValues);
         foreach ($nonEmailValues as $index => $value) {
             $this->assertFalse(
-                Validator::isEmail($value),
-                $validator->validateType('email', $value)
+                Validator::isEmail($value)
             );
         }
     }
@@ -601,24 +582,21 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         // Validate either IPv4 or IPv6 addresses
         foreach ($this->ipValues as $value) {
             $this->assertTrue(
-                Validator::isIP($value) &&
-                $validator->validateType('ip', $value)
+                Validator::isIP($value)
             );
         }
 
         // Validate IPv4 addresses
         foreach ($this->ipv4Values as $value) {
             $this->assertTrue(
-                Validator::isIPv4($value) &&
-                $validator->validateType('ipv4', $value)
+                Validator::isIPv4($value)
             );
         }
 
         // Validate IPv6 addresses
         foreach ($this->ipv6Values as $value) {
             $this->assertTrue(
-                Validator::isIPv6($value) &&
-                $validator->validateType('ipv6', $value)
+                Validator::isIPv6($value)
             );
         }
 
@@ -627,10 +605,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             $this->assertFalse(
                 Validator::isIP($value) &&
                 Validator::isIPv4($value) &&
-                Validator::isIPv6($value) &&
-                $validator->validateType('ip', $value) &&
-                $validator->validateType('ipv4', $value) &&
-                $validator->validateType('ipv6', $value)
+                Validator::isIPv6($value)
             );
         }
     }
@@ -646,9 +621,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($this->dateTimeValues as $value) {
             $this->assertTrue(
                 Validator::isDate($value) &&
-                Validator::isDateTime($value) &&
-                $validator->validateType('date', $value) &&
-                $validator->validateType('datetime', $value)
+                Validator::isDateTime($value)
             );
         }
 
@@ -663,9 +636,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($formatDateTime as $format => $value) {
             $this->assertTrue(
                 Validator::isDate($value, ['format' => $format]) &&
-                Validator::isDateTime($value, ['format' => $format]) &&
-                $validator->validateType('date', $value, ['format' => $format]) &&
-                $validator->validateType('datetime', $value, ['format' => $format])
+                Validator::isDateTime($value, ['format' => $format])
             );
         }
 
@@ -674,9 +645,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($nonDateTimeValues as $value) {
             $this->assertFalse(
                 Validator::isDate($value) &&
-                Validator::isDateTime($value) &&
-                $validator->validateType('date', $value) &&
-                $validator->validateType('datetime', $value)
+                Validator::isDateTime($value)
             );
         }
 
@@ -689,9 +658,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         foreach ($formatDateTime as $format => $value) {
             $this->assertFalse(
                 Validator::isDate($value, ['format' => $format]) &&
-                Validator::isDateTime($value, ['format' => $format]) &&
-                $validator->validateType('date', $value, ['format' => $format]) &&
-                $validator->validateType('datetime', $value, ['format' => $format])
+                Validator::isDateTime($value, ['format' => $format])
             );
         }
     }
@@ -738,32 +705,32 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     public function testCustomValidatorRule()
     {
         $rules = [
-            'test1' => function ($name, $value, $validator) {
+            'test1' => function ($value, $rule, $validator) {
                 $expected = 100;
                 $valid = $value == $expected;
                 if (!$valid) {
-                    $validator->setError($name, "'$value' does not equal '$expected'");
+                    $validator->setError($rule['name'], "'$value' does not equal '$expected'");
                 }
                 return $valid;
             },
             'test2' => [
                 'type' => 'any',
-                'validator' => function ($name, $value, $validator) {
+                'validator' => function ($value, $rule, $validator) {
                     $expected = 100;
                     $valid = $value == $expected;
                     if (!$valid) {
-                        $validator->setError($name, "'$value' does not equal '$expected'");
+                        $validator->setError($rule['name'], "'$value' does not equal '$expected'");
                     }
                     return $valid;
                 }
             ],
             'test3' => [
                 'type' => 'string',
-                'validator' => function ($name, $value, $validator) {
+                'validator' => function ($value, $rule, $validator) {
                     $expected = 'Hello, World!';
                     $valid = $value == $expected;
                     if (!$valid) {
-                        $validator->setError($name, "'$value' does not equal '$expected'");
+                        $validator->setError($rule['name'], "'$value' does not equal '$expected'");
                     }
                     return $valid;
                 }
@@ -782,7 +749,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             } elseif ($name == 'test3') {
                 // Since test3 has type of 'string' the validator will make sure
                 // the value is a string before running the customer validator
-                $this->assertEquals("'10' is not valid string for 'test3'.", $err[0]);
+                $this->assertEquals("Value (10) failed to validate as 'string'", $err[0]);
             }
         }
     }
