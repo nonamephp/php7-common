@@ -26,9 +26,7 @@ namespace Noname\Common;
  * @method static bool isAlpha(mixed $value, array $rule = []) Checks if value contains only alpha characters
  * @method static bool isArr(mixed $value, array $rule = []) Checks if value is an array
  * @method static bool isArray(mixed $value, array $rule = []) Checks if value is an array
- * @method static bool isObj(mixed $value, array $rule = []) Checks if value is an object
  * @method static bool isObject(mixed $value, array $rule = []) Checks if value is an object
- * @method static bool isClosure(mixed $value, array $rule = []) Checks if value is instance of \Closure
  * @method static bool isCallable(mixed $value, array $rule = []) Checks if value is callable
  * @method static bool isEmail(mixed $value, array $rule = []) Checks if value is valid email address
  * @method static bool isIP(mixed $value, array $rule = []) Checks if value is valid IPv4 or IPv6
@@ -40,69 +38,55 @@ namespace Noname\Common;
 class Validator
 {
     /**
+     * Collection of values to be validated.
+     *
      * @var Collection
      */
     protected $values;
 
     /**
+     * Collection of validation rules.
+     *
      * @var Collection
      */
     protected $rules;
 
     /**
+     * Collection of errors thrown during validation.
+     *
      * @var Collection
      */
     protected $errors;
 
     /**
-     * Map built-in types to associated validate method
+     * Collection of type validators (e.g. string)
      *
-     * @var array
+     * @var Collection
      */
-    protected $typeValidateFunctionMap = [
-        '*' => 'validateAny',
-        'any' => 'validateAny',
-        'null' => 'validateNull',
-        'bool' => 'validateBoolean',
-        'boolean' => 'validateBoolean',
-        'scalar' => 'validateScalar',
-        'str' => 'validateString',
-        'string' => 'validateString',
-        'int' => 'validateInteger',
-        'integer' => 'validateInteger',
-        'num' => 'validateNumeric',
-        'numeric' => 'validateNumeric',
-        'float' => 'validateFloat',
-        'double' => 'validateFloat',
-        'alnum' => 'validateAlphaNumeric',
-        'alphanumeric' => 'validateAlphaNumeric',
-        'alpha' => 'validateAlpha',
-        'arr' => 'validateArray',
-        'array' => 'validateArray',
-        'obj' => 'validateObject',
-        'object' => 'validateObject',
-        'closure' => 'validateClosure',
-        'callable' => 'validateCallable',
-        'email' => 'validateEmail',
-        'ip' => 'validateIP',
-        'ipv4' => 'validateIPv4',
-        'ipv6' => 'validateIPv6',
-        'date' => 'validateDateTime',
-        'datetime' => 'validateDateTime',
-    ];
+    protected $typeValidators;
 
     /**
-     * Create Validator
+     * Flag for when validator is called statically.
+     *
+     * @var bool
+     */
+    protected $isStaticMethodCall = false;
+
+    /**
+     * Create instance of Validator
      *
      * @param array $values
      * @param array $rules
      */
     public function __construct(array $values = [], array $rules = [])
     {
-        // Create collections for datasets
+        // Create collections
         $this->values = new Collection($values);
         $this->rules = new Collection($rules);
         $this->errors = new Collection();
+
+        // Register built-in validator types
+        $this->registerBuiltInTypes();
     }
 
     /**
@@ -134,7 +118,7 @@ class Validator
                         $rule = [];
                         list($type, $value) = $arguments;
                     }
-                    return (new self())->validateType($type, $value, $rule);
+                    return (new self())->staticMethodCall()->validateType($type, $value, $rule);
                 }
                 throw new \InvalidArgumentException("Too many arguments passed to Validator::{$method}()");
             } else {
@@ -142,12 +126,157 @@ class Validator
                 $type = implode('', $parts);
                 $value = $arguments[0];
                 $rule = isset($arguments[1]) && is_array($arguments[1]) ? $arguments[1] : [];
-                return (new self())->validateType($type, $value, $rule);
+                return (new self())->staticMethodCall()->validateType($type, $value, $rule);
             }
         }
 
         // Undefined method; Throw exception
         throw new \BadMethodCallException("Validator::{$method}() not defined.");
+    }
+
+    /**
+     * Sets flag for when validator is called statically.
+     *
+     * @return $this
+     */
+    protected function staticMethodCall()
+    {
+        $this->isStaticMethodCall = true;
+        return $this;
+    }
+
+    /**
+     * Register built-in type validators.
+     */
+    protected function registerBuiltInTypes()
+    {
+        $this->typeValidators = new Collection();
+
+        $this->addType('any', [
+            'alias' => '*',
+            'validator' => [$this, 'validateAny']
+        ]);
+
+        $this->addType('null', [
+            'validator' => [$this, 'validateNull']
+        ]);
+
+        $this->addType('boolean', [
+            'alias' => 'bool',
+            'validator' => [$this, 'validateBoolean']
+        ]);
+
+        $this->addType('scalar', [
+            'validator' => [$this, 'validateScalar']
+        ]);
+
+        $this->addType('numeric', [
+            'alias' => 'num',
+            'validator' => [$this, 'validateNumeric']
+        ]);
+
+        $this->addType('integer', [
+            'alias' => 'int',
+            'extends' => 'numeric',
+            'validator' => [$this, 'validateInteger']
+        ]);
+
+        $this->addType('float', [
+            'alias' => 'double',
+            'extends' => 'numeric',
+            'validator' => [$this, 'validateFloat']
+        ]);
+
+        $this->addType('string', [
+            'alias' => 'str',
+            'validator' => [$this, 'validateString']
+        ]);
+
+        $this->addType('alpha', [
+            'validator' => [$this, 'validateAlpha']
+        ]);
+
+        $this->addType('alphanumeric', [
+            'alias' => 'alnum',
+            'validator' => [$this, 'validateAlphaNumeric']
+        ]);
+
+        $this->addType('array', [
+            'alias' => 'arr',
+            'validator' => [$this, 'validateArray']
+        ]);
+
+        $this->addType('object', [
+            'validator' => [$this, 'validateObject']
+        ]);
+
+        $this->addType('callable', [
+            'validator' => [$this, 'validateCallable']
+        ]);
+
+        $this->addType('email', [
+            'extends' => 'string',
+            'validator' => [$this, 'validateEmail']
+        ]);
+
+        $this->addType('ip', [
+            'validator' => [$this, 'validateIP']
+        ]);
+
+        $this->addType('ipv4', [
+            'validator' => [$this, 'validateIPv4']
+        ]);
+
+        $this->addType('ipv6', [
+            'validator' => [$this, 'validateIPv6']
+        ]);
+
+        $this->addType('date', [
+            'alias' => 'datetime',
+            'validator' => [$this, 'validateDateTime']
+        ]);
+    }
+
+    /**
+     * Add validator type.
+     *
+     * @param string $typeName
+     * @param array $typeRule
+     * @throws \InvalidArgumentException
+     */
+    public function addType(string $typeName, array $typeRule)
+    {
+        // Name must be unique
+        if (isset($this->typeValidators[$typeName])) {
+            throw new \InvalidArgumentException("Cannot add type '$typeName' because it is already defined");
+        }
+
+        // Type must have a validator
+        if (!isset($typeRule['validator'])) {
+            throw new \InvalidArgumentException("Cannot add type '$typeName' because no validator is defined");
+        }
+
+        // If type extends another type then the extended type must be defined
+        if (isset($typeRule['extends']) && !isset($this->typeValidators[$typeRule['extends']])) {
+            throw new \InvalidArgumentException("Cannot extend type '{$typeRule['extends']}' because it is not defined");
+        }
+
+        // Alias name must be unique
+        if (isset($typeRule['alias']) && isset($this->typeValidators[$typeRule['alias']])) {
+            throw new \InvalidArgumentException("Cannot add type alias '{$typeRule['alias']}' because it is already defined");
+        }
+
+        // Validator must be callable
+        if (!is_callable($typeRule['validator'])) {
+            throw new \InvalidArgumentException("Cannot add type '$typeName' because validator is not callable.");
+        }
+
+        // Add type to collection with name
+        $this->typeValidators[$typeName] = $typeRule;
+        if (isset($typeRule['alias'])) {
+            // Add type alias to collection as well
+            $this->typeValidators[$typeRule['alias']] = $typeRule;
+        }
     }
 
     /**
@@ -178,7 +307,7 @@ class Validator
      *
      * @return array
      */
-    public function values() : array
+    public function values(): array
     {
         return $this->values->toArray();
     }
@@ -211,26 +340,28 @@ class Validator
      *
      * @return array
      */
-    public function rules() : array
+    public function rules(): array
     {
         return $this->rules->toArray();
     }
 
     /**
-     * Validate the values based on the rules.
+     * Validate values using rules.
      *
-     * @return bool
+     * @return bool Returns TRUE if there are no errors and FALSE otherwise
+     * @throws \InvalidArgumentException
      */
-    public function validate() : bool
+    public function validate(): bool
     {
         if ($this->rules->count()) {
+            // Loop through each rule and validate their respective values
             foreach ($this->rules as $name => $rule) {
                 // Convert string/closure rules into proper rule format
                 if (is_string($rule)) {
                     $rule = ['type' => $rule];
-                } elseif ($rule instanceof \Closure || is_callable($rule)) {
+                } elseif (is_callable($rule)) {
                     // Rule uses closure/callable for validation
-                    $rule = ['type' => 'any', 'validator' => $rule];
+                    $rule = ['type' => '*', 'validator' => $rule];
                 }
 
                 // Make sure rule is formatted correctly
@@ -246,36 +377,31 @@ class Validator
                 // Add key/name to $rule
                 $rule['name'] = $name;
 
-                // Check if value exists
-                if ($value = $this->values->get($name, false)) {
-                    if (isset($rule['extends'])) {
-                        // Validate extended type
-                        if (!$this->validateType($rule['extends'], $value, $rule)) {
-                            $this->setError($name, "'$value' is not valid {$rule['extends']} for '$name'.");
-                            continue;
-                        }
-                    }
-                    // Validate using type validators
+                // Check if value exists in dataset
+                if ($value = $this->values->get($rule['name'], false)) {
+                    // Validate type
                     if (!$this->validateType($rule['type'], $value, $rule)) {
-                        $this->setError($name, "'$value' is not valid {$rule['type']} for '$name'.");
+                        // Value didn't pass validation; Process next rule.
                         continue;
                     }
 
-                    // Validate using closure/callable validator
+                    // Validate using callable validator
                     if (isset($rule['validator'])) {
-                        if ($rule['validator'] instanceof \Closure) {
-                            if (!$rule['validator']($name, $value, $this)) {
-                                $this->setError($name, "'$value' is not valid for '$name'.");
+                        if (is_callable($rule['validator'])) {
+                            if (!call_user_func_array($rule['validator'], [$value, $rule, $this])) {
+                                if (!$this->errors->has($rule['name'])) {
+                                    // Set error message for callable validator if not already set
+                                    $this->setError($rule['name'], "Value ($value) failed to validate as '{$rule['type']}'");
+                                }
+                                // Value didn't pass validation; Process next rule
                                 continue;
                             }
-                        } elseif (is_callable($rule['validator'])) {
-                            if (!call_user_func_array($rule['validator'], [$name, $value, $this])) {
-                                $this->setError($name, "'$value' is not valid for '$name'.");
-                                continue;
-                            }
+                        } else {
+                            throw new \InvalidArgumentException("Custom validator for {$rule['name']} must be callable");
                         }
                     }
                 } else {
+                    // Set an error if the undefined value is required
                     if ($rule['required']) {
                         $this->setError($name, "Value for '$name' is required.");
                         continue;
@@ -309,7 +435,7 @@ class Validator
      *
      * @return array
      */
-    public function getErrors() : array
+    public function getErrors(): array
     {
         return $this->errors->toArray();
     }
@@ -319,7 +445,7 @@ class Validator
      *
      * @return bool
      */
-    public function hasErrors() : bool
+    public function hasErrors(): bool
     {
         return (bool) $this->errors->count();
     }
@@ -328,43 +454,75 @@ class Validator
     // Validators
 
     /**
-     * Passes value to appropriate validate method based on $type.
+     * Validates value using appropriate type validator.
      *
      * @param string $type
      * @param mixed $value
      * @param array $rule
      * @return bool
      */
-    public function validateType($type, $value, array $rule = []) : bool
+    protected function validateType($type, $value, array $rule = []): bool
     {
         $type = strtolower($type);
 
-        // Check for type[]
-        $arrayType = (substr($type, -2) == '[]');
-        if ($arrayType) {
+        // Check for array type (e.g. type[])
+        $isArrayType = (substr($type, -2) == '[]');
+        if ($isArrayType) {
             $type = substr($type, 0, -2);
         }
 
-        if (isset($this->typeValidateFunctionMap[$type])) {
-            if ($arrayType) {
-                // Validate an array of values
-                $values = (array) $value;
-                foreach ($values as $index => $value) {
-                    if (!$this->{$this->typeValidateFunctionMap[$type]}($value, $rule)) {
-                        $this->setError($rule['name'], "'$value' failed to validate as '$type'");
-                    }
-                }
-
-                // Return true regardless of any errors to avoid default error
-                // that is set when this method returns false
-                return true;
-            }
-
-            // Validate the value
-            return $this->{$this->typeValidateFunctionMap[$type]}($value, $rule);
+        // Load rules for type validator
+        $validator = $this->typeValidators->get($type);
+        if (!$validator) {
+            throw new \InvalidArgumentException("'$type' is not a valid validator type");
         }
 
-        throw new \InvalidArgumentException("Type '$type' is not a valid rule type");
+        if ($this->isStaticMethodCall) {
+            // The name doesn't matter when validator is called statically,
+            // but is needed for setting error messages that won't be used
+            // other than to check for the existence of errors.
+            $rule['name'] = '_';
+        }
+
+        if ($isArrayType) {
+            // Validate an array of values
+            $values = (array) $value;
+            foreach ($values as $index => $value) {
+                // Validate the extended type first
+                if (isset($validator['extends'])) {
+                    $this->validateType($validator['extends'], $value, $rule);
+                }
+
+                // Validate the value using the type validator
+                if (!call_user_func_array($validator['validator'], [$value, $rule, $this])) {
+                    if (is_scalar($value)) {
+                        // Value is scalar and can be included in the error message
+                        $this->setError($rule['name'], "Value ($value) failed to validate as '$type'");
+                    } else {
+                        // Value is not scalar and cannot be included in the error message
+                        $this->setError($rule['name'], "Value failed to validate as '$type'");
+                    }
+                }
+            }
+        } else {
+            // Validate the value
+            if (isset($validator['extends'])) {
+                $this->validateType($validator['extends'], $value, $rule);
+            }
+
+            // Validate the value using the type's validator
+            if (!call_user_func_array($validator['validator'], [$value, $rule, $this])) {
+                if (is_scalar($value)) {
+                    // Value is scalar and can be included in the error message
+                    $this->setError($rule['name'], "Value ($value) failed to validate as '$type'");
+                } else {
+                    // Value is not scalar and cannot be included in the error message
+                    $this->setError($rule['name'], "Value failed to validate as '$type'");
+                }
+            }
+        }
+
+        return $this->hasErrors() ? false : true;
     }
 
     /**
@@ -374,7 +532,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateAny($value, array $rule = []) : bool
+    protected function validateAny($value, array $rule = []): bool
     {
         return true;
     }
@@ -386,7 +544,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateNull($value, array $rule = []) : bool
+    protected function validateNull($value, array $rule = []): bool
     {
         return is_null($value);
     }
@@ -398,7 +556,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateBoolean($value, array $rule = []) : bool
+    protected function validateBoolean($value, array $rule = []): bool
     {
         return is_bool($value);
     }
@@ -410,7 +568,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateScalar($value, array $rule = []) : bool
+    protected function validateScalar($value, array $rule = []): bool
     {
         return is_scalar($value);
     }
@@ -422,7 +580,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateArray($value, array $rule = []) : bool
+    protected function validateArray($value, array $rule = []): bool
     {
         return is_array($value);
     }
@@ -434,7 +592,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateObject($value, array $rule = []) : bool
+    protected function validateObject($value, array $rule = []): bool
     {
         return is_object($value);
     }
@@ -446,7 +604,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateString($value, array $rule = []) : bool
+    protected function validateString($value, array $rule = []): bool
     {
         return is_string($value);
     }
@@ -458,7 +616,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateInteger($value, array $rule = []) : bool
+    protected function validateInteger($value, array $rule = []): bool
     {
         return is_int($value);
     }
@@ -470,7 +628,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateNumeric($value, array $rule = []) : bool
+    protected function validateNumeric($value, array $rule = []): bool
     {
         return is_numeric($value);
     }
@@ -482,7 +640,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateFloat($value, array $rule = []) : bool
+    protected function validateFloat($value, array $rule = []): bool
     {
         return is_float($value);
     }
@@ -494,7 +652,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateAlphaNumeric($value, array $rule = []) : bool
+    protected function validateAlphaNumeric($value, array $rule = []): bool
     {
         return is_string($value) && ctype_alnum($value);
     }
@@ -506,7 +664,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateAlpha($value, array $rule = []) : bool
+    protected function validateAlpha($value, array $rule = []): bool
     {
         return is_string($value) && ctype_alpha($value);
     }
@@ -518,7 +676,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateEmail($value, array $rule = []) : bool
+    protected function validateEmail($value, array $rule = []): bool
     {
         return (bool) filter_var($value, FILTER_VALIDATE_EMAIL);
     }
@@ -530,7 +688,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateIP($value, array $rule = []) : bool
+    protected function validateIP($value, array $rule = []): bool
     {
         return $this->validateIPv4($value, $rule) || $this->validateIPv6($value, $rule);
     }
@@ -542,7 +700,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateIPv4($value, array $rule = []) : bool
+    protected function validateIPv4($value, array $rule = []): bool
     {
         return (bool) filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
     }
@@ -554,21 +712,9 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateIPv6($value, array $rule = []) : bool
+    protected function validateIPv6($value, array $rule = []): bool
     {
         return (bool) filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
-    }
-
-    /**
-     * Validate that $value is instance of \Closure.
-     *
-     * @param mixed $value
-     * @param array $rule
-     * @return bool
-     */
-    protected function validateClosure($value, array $rule = []) : bool
-    {
-        return ($value instanceof \Closure);
     }
 
     /**
@@ -578,7 +724,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateCallable($value, array $rule = []) : bool
+    protected function validateCallable($value, array $rule = []): bool
     {
         return is_callable($value);
     }
@@ -590,7 +736,7 @@ class Validator
      * @param array $rule
      * @return bool
      */
-    protected function validateDateTime($value, array $rule = []) : bool
+    protected function validateDateTime($value, array $rule = []): bool
     {
         if (!is_string($value) && !is_int($value)) {
             return false;
@@ -603,7 +749,7 @@ class Validator
             return false;
         }
 
-        // Returns new \DateTime instance of success, FALSE otherwise
+        // Returns new \DateTime instance on success, FALSE otherwise
         if (($date = date_create($value)) === false) {
             return false;
         }
