@@ -221,4 +221,19 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         unset($collection['key1']);
         $this->assertFalse($collection->has('key1'));
     }
+
+    /**
+     * @covers Collection::get
+     */
+    public function testGetMultipleItems()
+    {
+        $collection = new Collection(['key1' => 'value1', 'key2' => 'value2']);
+        $values = $collection->get(['key1', 'key2', 'key3']);
+
+        $this->assertTrue(array_key_exists('key1', $values) && $values['key1'] == 'value1');
+        $this->assertTrue(array_key_exists('key2', $values) && $values['key2'] == 'value2');
+
+        // Assert the key3 equals the default (null)
+        $this->assertTrue(array_key_exists('key3', $values) && $values['key3'] == null);
+    }
 }
