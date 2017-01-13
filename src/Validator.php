@@ -582,7 +582,25 @@ class Validator
      */
     protected function validateArray($value, array $rule = []): bool
     {
-        return is_array($value);
+        $valid = is_array($value);
+
+        if (isset($rule['allow_empty']) && $rule['allow_empty'] === false) {
+            $valid = $valid && !empty($value);
+        }
+
+        if (isset($rule['count']) && is_int($rule['count'])) {
+            $valid = $valid && (count($value) == $rule['count']);
+        }
+
+        if (isset($rule['min_count']) && is_int($rule['min_count'])) {
+            $valid = $valid && (count($value) >= $rule['min_count']);
+        }
+
+        if (isset($rule['max_count']) && is_int($rule['max_count'])) {
+            $valid = $valid && (count($value) <= $rule['max_count']);
+        }
+
+        return $valid;
     }
 
     /**
@@ -606,7 +624,33 @@ class Validator
      */
     protected function validateString($value, array $rule = []): bool
     {
-        return is_string($value);
+        $valid = is_string($value);
+
+        if (isset($rule['equals']) && is_string($rule['equals'])) {
+            $valid = $valid && $value == $rule['equals'];
+        } elseif (isset($rule['in']) && is_array($rule['in'])) {
+            $valid = $valid && in_array($value, $rule['in']);
+        } elseif (isset($rule['regex']) && is_string($rule['regex'])) {
+            $valid = $valid && preg_match($rule['regex'], $value);
+        }
+
+        if (isset($rule['allow_empty']) && $rule['allow_empty'] === false) {
+            $valid = $valid && !empty($value);
+        }
+
+        if (isset($rule['allow_null']) && $rule['allow_null'] === true) {
+            $valid = $valid || is_null($value);
+        }
+
+        if (isset($rule['min_length']) && is_int($rule['min_length'])) {
+            $valid = $valid && (strlen($value) >= $rule['min_length']);
+        }
+
+        if (isset($rule['max_length']) && is_int($rule['max_length'])) {
+            $valid = $valid && (strlen($value) <= $rule['max_length']);
+        }
+
+        return $valid;
     }
 
     /**
@@ -615,10 +659,47 @@ class Validator
      * @param mixed $value
      * @param array $rule
      * @return bool
+     * @throws \Exception
      */
     protected function validateInteger($value, array $rule = []): bool
     {
-        return is_int($value);
+        $valid = is_int($value);
+
+        if (isset($rule['unsigned']) && $rule['unsigned'] === true) {
+            // Validate that int is unsigned
+            if ($valid = $valid && ($value > 0)) {
+                // Unsigned integer violation check
+                foreach (['>', '>=', '<', '<=', 'equals'] as $r) {
+                    if (isset($rule[$r]) && $rule[$r] < 0) {
+                        throw new \Exception("'$r' must be >= 0 for unsigned integers.");
+                    }
+                }
+            }
+        }
+
+        if (isset($rule['equals']) && is_int($rule['equals'])) {
+            $valid = $valid && $value == $rule['equals'];
+        }
+
+        if (isset($rule['in']) && is_array($rule['in'])) {
+            $valid = $valid && in_array($value, $rule['in']);
+        }
+
+        // Validate > or >=, with > getting priority over >=
+        if (isset($rule['>']) && is_int($rule['>'])) {
+            $valid = $valid && ($value > $rule['>']);
+        } elseif (isset($rule['>=']) && is_int($rule['>='])) {
+            $valid = $valid && ($value >= $rule['>=']);
+        }
+
+        // Validate < or <=, with < getting priority over <=
+        if (isset($rule['<']) && is_int($rule['<'])) {
+            $valid = $valid && ($value < $rule['<']);
+        } elseif (isset($rule['<=']) && is_int($rule['<='])) {
+            $valid = $valid && ($value <= $rule['<=']);
+        }
+
+        return $valid;
     }
 
     /**
@@ -743,18 +824,26 @@ class Validator
         }
 
         $value = (string) $value;
+        $compare = $value;
+
+        if (strlen($compare) == 4) {
+            // Value is presumably a 4-digit year (e.g. 2016) and as-is doesn't
+            // play nice with strtotime() or date_create()
+            $compare .= "-01-01";
+        }
 
         // Returns a timestamp on success, FALSE otherwise
-        if (($time = strtotime($value)) === false) {
+        if (($time = strtotime($compare)) === false) {
             return false;
         }
 
         // Returns new \DateTime instance on success, FALSE otherwise
-        if (($date = date_create($value)) === false) {
+        if (($date = date_create($compare)) === false) {
             return false;
         }
 
         if (isset($rule['format'])) {
+            // Use original value for comparing format
             return $date->format($rule['format']) == $value;
         }
 
