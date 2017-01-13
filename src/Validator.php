@@ -628,10 +628,10 @@ class Validator
 
         if (isset($rule['equals']) && is_string($rule['equals'])) {
             $valid = $valid && $value == $rule['equals'];
-        }
-
-        if (isset($rule['in']) && is_array($rule['in'])) {
+        } elseif (isset($rule['in']) && is_array($rule['in'])) {
             $valid = $valid && in_array($value, $rule['in']);
+        } elseif (isset($rule['regex']) && is_string($rule['regex'])) {
+            $valid = $valid && preg_match($rule['regex'], $value);
         }
 
         if (isset($rule['allow_empty']) && $rule['allow_empty'] === false) {
@@ -826,7 +826,7 @@ class Validator
         $value = (string) $value;
         $compare = $value;
 
-        if(strlen($compare) == 4){
+        if (strlen($compare) == 4) {
             // Value is presumably a 4-digit year (e.g. 2016) and as-is doesn't
             // play nice with strtotime() or date_create()
             $compare .= "-01-01";

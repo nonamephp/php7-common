@@ -342,6 +342,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $str_allow_null = ['allow_null' => true];
         $str_equals = ['equals' => 'Hello, World!'];
         $str_in = ['in' => ['hello', 'world', 'foo', 'bar']];
+        $str_regex = ['regex' => "/php/i"];
 
         $this->assertTrue(Validator::isString('abc', array_merge($str_min_length, $str_max_length)));
         $this->assertFalse(Validator::isString('', $str_min_length));
@@ -354,6 +355,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Validator::isString('Hello World!', $str_equals));
         $this->assertTrue(Validator::isString('foo', $str_in));
         $this->assertFalse(Validator::isString('cat', $str_in));
+        $this->assertTrue(Validator::isString('PHP is my favorite!', $str_regex));
+        $this->assertFalse(Validator::isString('Java is my favorite!', $str_regex));
     }
 
     /**
