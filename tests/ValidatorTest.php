@@ -534,6 +534,21 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 Validator::isArray($value)
             );
         }
+
+        // Test array rules
+        $arr_count = ['count' => 3];
+        $arr_min_count = ['min_count' => 3];
+        $arr_max_count = ['max_count' => 3];
+        $arr_allow_empty = ['allow_empty' => false];
+
+        $this->assertTrue(Validator::isArray([1,2,3], $arr_count));
+        $this->assertFalse(Validator::isArray([1], $arr_count));
+        $this->assertTrue(Validator::isArray([1,2,3,4,5], $arr_min_count));
+        $this->assertFalse(Validator::isArray([1,2], $arr_min_count));
+        $this->assertTrue(Validator::isArray([1,2,3], $arr_max_count));
+        $this->assertFalse(Validator::isArray([1,2,3,4], $arr_max_count));
+        $this->assertTrue(Validator::isArray([1,2,3], $arr_allow_empty));
+        $this->assertFalse(Validator::isArray([], $arr_allow_empty));
     }
 
     /**
