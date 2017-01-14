@@ -77,6 +77,10 @@ Alias for `toArray()`.
 
 Returns all items in the collection as an associative array.
 
+##### `flatten() : array`
+
+Flatten all items in the collection using dot notation.
+
 ### \Noname\Common\Validator
 
 Use `Validator` to validate your data based on a set of rules.
