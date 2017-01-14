@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 namespace Noname\Common;
 
 use ArrayAccess;
@@ -116,7 +116,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
      *
      * @return array
      */
-    public function all() : array
+    public function all(): array
     {
         return $this->toArray();
     }
@@ -126,7 +126,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
      *
      * @return array
      */
-    public function keys() : array
+    public function keys(): array
     {
         return array_keys($this->items);
     }
@@ -136,7 +136,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
      *
      * @return array
      */
-    public function values() : array
+    public function values(): array
     {
         return array_values($this->items);
     }
@@ -147,7 +147,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
      * @param string $key
      * @return boolean
      */
-    public function has($key) : bool
+    public function has($key): bool
     {
         return isset($this->items[$key]);
     }
@@ -161,7 +161,7 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
      * @return boolean
      * @throws \InvalidArgumentException
      */
-    public function is($key, $value, $operator = null) : bool
+    public function is($key, $value, $operator = null): bool
     {
         $keyValue = $this->get($key);
 
@@ -207,9 +207,19 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
      *
      * @return array
      */
-    public function toArray() : array
+    public function toArray(): array
     {
         return $this->items;
+    }
+
+    /**
+     * Flatten collection with dot (.) separator.
+     *
+     * @return array
+     */
+    public function flatten(): array
+    {
+        return Arr::flatten($this->items);
     }
 
     ///////////////////////////////////
