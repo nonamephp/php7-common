@@ -243,3 +243,13 @@ Validator::isstring('Hello world!');
 // This is valid because 'String' starts with uppercased letter.
 Validator::isString('Hello world!');
  ```
+ 
+### `\Noname\Common\Arr`
+
+A helper library for working with arrays. 
+
+#### Arr Methods
+
+##### `Arr::flatten(array $array, string $separator = '.', string $prepend = '') : array`
+
+Flatten an associative array using a custom separator.
