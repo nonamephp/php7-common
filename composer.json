@@ -1,7 +1,7 @@
 {
     "name": "nonamephp/php7-common",
     "description": "A collection of common PHP 7 libraries",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "license": "MIT",
     "authors": [
         {
@@ -9,7 +9,7 @@
             "email": "ctyler@cdtwebsolutions.com"
         }
     ],
-    "keywords": ["noname", "nonamephp", "common", "collection", "validator"],
+    "keywords": ["noname", "nonamephp", "common", "collection", "validator", "array"],
     "homepage": "https://github.com/nonamephp/php7-common",
     "require": {
         "php": ">=7.0"

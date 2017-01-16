@@ -77,6 +77,10 @@ Alias for `toArray()`.
 
 Returns all items in the collection as an associative array.
 
+##### `flatten() : array`
+
+Flatten all items in the collection using dot notation.
+
 ### \Noname\Common\Validator
 
 Use `Validator` to validate your data based on a set of rules.
@@ -239,3 +243,13 @@ Validator::isstring('Hello world!');
 // This is valid because 'String' starts with uppercased letter.
 Validator::isString('Hello world!');
  ```
+ 
+### `\Noname\Common\Arr`
+
+A helper library for working with arrays. 
+
+#### Arr Methods
+
+##### `Arr::flatten(array $array, string $separator = '.', string $prepend = '') : array`
+
+Flatten an associative array using a custom separator.
