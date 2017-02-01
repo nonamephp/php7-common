@@ -153,7 +153,7 @@ use Noname\Common\Validator;
 
 $values = ['a' => 2];
 $rules = ['a' => ['type' => 'equals_2']];
-$validator = new Validator();
+$validator = new Validator($values, $rules);
 $validator->addType('equals_2', [
     'extends' => 'numeric',
     'validator' => function ($value, $rule, $validator) {
@@ -250,6 +250,10 @@ A helper library for working with arrays.
 
 #### Arr Methods
 
-##### `Arr::flatten(array $array, string $separator = '.', string $prepend = '') : array`
+##### `static flatten(array $array, string $separator = '.', string $prepend = '') : array`
 
 Flatten an associative array using a custom separator.
+
+##### `static dot(array $array) : array`
+
+Flatten an associative array using a dot (.) separator.

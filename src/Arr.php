@@ -32,4 +32,15 @@ class Arr
 
         return $flatArray;
     }
+
+    /**
+     * Flatten an associative array using a dot (.) separator.
+     *
+     * @param array $array
+     * @return array
+     */
+    public static function dot(array $array): array
+    {
+        return self::flatten($array);
+    }
 }
