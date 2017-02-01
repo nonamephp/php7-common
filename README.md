@@ -253,3 +253,7 @@ A helper library for working with arrays.
 ##### `static flatten(array $array, string $separator = '.', string $prepend = '') : array`
 
 Flatten an associative array using a custom separator.
+
+##### `static dot(array $array) : array`
+
+Flatten an associative array using a dot (.) separator.
