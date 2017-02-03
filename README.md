@@ -4,8 +4,6 @@ Status](https://travis-ci.org/nonamephp/php7-common.svg?branch=master)](https://
 php7-common 
 =============
 
-_This project is in development and is not recommended for use in production environments_
-
 A collection of common libraries for PHP 7.
 
 ## What's in the box?
