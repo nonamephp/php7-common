@@ -43,4 +43,25 @@ class Arr
     {
         return self::flatten($array);
     }
+
+    /**
+     * Recursively assign the callable's return value to each array item.
+     *
+     * Array keys are preserved.
+     *
+     * @param array $array
+     * @param callable $callable
+     * @return array
+     */
+    public static function each(array $array, callable $callable): array
+    {
+        foreach ($array as $key => $value) {
+            if (is_array($value) && !empty($value)) {
+                $array[$key] = self::each($value, $callable);
+            } else {
+                $array[$key] = call_user_func($callable, $value);
+            }
+        }
+        return $array;
+    }
 }
