@@ -255,3 +255,19 @@ Flatten an associative array using a custom separator.
 ##### `static dot(array $array) : array`
 
 Flatten an associative array using a dot (.) separator.
+
+##### `static each(array $array, callable $callable) : array`
+
+Recursively assign the callable's return value to each array item. Array keys are preserved.
+
+```php
+<?php
+use Noname\Common\Arr;
+
+$values = [1, 2, 3, 4, 5];
+
+// @return [2, 4, 6, 8, 10]
+$values_doubled = Arr::each($values, function ($value) {
+    return $value * 2;
+});
+```
