@@ -135,6 +135,10 @@ Alias for `toArray()`.
 
 Returns an array of all of the items in the collection.
 
+##### `toJson() : string` 
+
+Returns collection as JSON.
+
 ##### `flatten() : array`
 
 Flatten all of the items in the collection using dot (.) notation.
