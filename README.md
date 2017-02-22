@@ -78,6 +78,10 @@ echo $collection->get('user_email');
 
 Creates an instance of `Collection`. Optionally pass an associative array for `$items` to prefill the collection with items.
 
+##### `static make(...$arrays) : Collection`
+
+Make a collection from one or more arrays.
+
 ##### `set(string $key, mixed $value) : void` 
 
 Add an item to the collection. If `$key` already exists in the collection it will be overwritten.

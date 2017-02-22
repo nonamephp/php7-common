@@ -68,6 +68,20 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
     // Tests
 
     /**
+     * @covers Collection::make
+     */
+    public function testMake()
+    {
+        $items_1 = ['key1' => 'val1'];
+        $items_2 = ['key2' => 'val2'];
+        $items_3 = ['key3' => 'val3'];
+        $collection = Collection::make($items_1, $items_2, $items_3);
+        $this->assertTrue($collection->has('key1'));
+        $this->assertTrue($collection->has('key2'));
+        $this->assertTrue($collection->has('key3'));
+    }
+
+    /**
      * @covers Collection::count
      */
     public function testEmpty()
