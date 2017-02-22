@@ -125,6 +125,18 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers Collection::toJson
+     * @dataProvider collectionItemsProvider
+     */
+    public function testToJson($key, $value)
+    {
+        $this->collection->set($key, $value);
+        $json = json_encode($this->collection);
+
+        $this->assertEquals($json, $this->collection->toJson());
+    }
+
+    /**
      * @covers Collection::is
      * @dataProvider isCollectionItemsProvider
      */

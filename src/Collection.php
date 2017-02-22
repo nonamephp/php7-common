@@ -213,6 +213,16 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
     }
 
     /**
+     * Get collection as JSON.
+     *
+     * @return string
+     */
+    public function toJson(): string
+    {
+        return json_encode($this);
+    }
+
+    /**
      * Flatten collection with dot (.) separator.
      *
      * @return array
