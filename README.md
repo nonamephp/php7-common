@@ -16,6 +16,7 @@ Use Composer to install `php7-common` into your project.
 
 * `Noname\Common\Arr`
 * `Noname\Common\Collection`
+* `Noname\Common\Str`
 * `Noname\Common\Validator`
 
 ### `\Noname\Common\Arr`
@@ -146,6 +147,24 @@ Returns collection as JSON.
 ##### `flatten() : array`
 
 Flatten all of the items in the collection using dot (.) notation.
+
+### `\Noname\Common\Str`
+
+A helper library for working with strings.
+
+#### Str Methods
+
+##### `static startsWith(string $string, string $prefix, bool $caseSensitive = true) : bool`
+
+Checks if string starts with given prefix. By default this method is case-sensitive.
+
+##### `static endsWith(string $string, string $suffix, bool $caseSensitive = true) : bool`
+
+Checks if string ends with given prefix. By default this method is case-sensitive.
+
+##### `static equals(string $a, string $b, bool $caseSensitive = true) : bool`
+
+Checks if two strings equal each other. By default this method is case-sensitive.
 
 ### \Noname\Common\Validator
 
