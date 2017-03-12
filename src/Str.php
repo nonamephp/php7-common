@@ -39,7 +39,7 @@ class Str
      */
     public static function endsWith(string $string, string $suffix, bool $caseSensitive = true): bool
     {
-        $ending = strlen($string)-strlen($suffix);
+        $ending = strlen($string) - strlen($suffix);
 
         if ($caseSensitive) {
             return strrpos($string, $suffix) === $ending;
