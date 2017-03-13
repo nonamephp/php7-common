@@ -166,6 +166,10 @@ Checks if string ends with given prefix. By default this method is case-sensitiv
 
 Checks if two strings equal each other. By default this method is case-sensitive.
 
+##### `static toArray(string $string) : array`
+
+Splits a string into an array containing each character.
+
 ### \Noname\Common\Validator
 
 Use `Validator` to validate your data based on a set of rules.

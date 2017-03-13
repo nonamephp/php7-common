@@ -44,4 +44,19 @@ class StrTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($caseSensitiveFalse);
         $this->assertTrue($caseInsensitive);
     }
+
+    /**
+     * @covers Str::toArray
+     */
+    public function testToArray()
+    {
+        $array = Str::toArray("FooBar");
+
+        $this->assertEquals('F', $array[0]);
+        $this->assertEquals('o', $array[1]);
+        $this->assertEquals('o', $array[2]);
+        $this->assertEquals('B', $array[3]);
+        $this->assertEquals('a', $array[4]);
+        $this->assertEquals('r', $array[5]);
+    }
 }

@@ -66,4 +66,15 @@ class Str
             return strcasecmp($a, $b) === 0;
         }
     }
+
+    /**
+     * Splits a string into an array containing each character.
+     *
+     * @param string $string
+     * @return array
+     */
+    public static function toArray(string $string): array
+    {
+        return str_split($string);
+    }
 }
