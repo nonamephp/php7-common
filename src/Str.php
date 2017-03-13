@@ -61,9 +61,9 @@ class Str
     public static function equals(string $a, string $b, bool $caseSensitive = true): bool
     {
         if ($caseSensitive) {
-            return $a === $b;
+            return strcmp($a, $b) === 0;
         } else {
-            return strtolower($a) === strtolower($b);
+            return strcasecmp($a, $b) === 0;
         }
     }
 }
