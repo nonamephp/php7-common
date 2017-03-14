@@ -46,6 +46,21 @@ class StrTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers Str::contains
+     */
+    public function testContains()
+    {
+        $string = "Hello, World. How are you?";
+        $caseSensitiveTrue = Str::contains($string, 'World');
+        $caseSensitiveFalse = Str::contains($string, 'world');
+        $caseInsensitive = Str::contains($string, 'world', false);
+
+        $this->assertTrue($caseSensitiveTrue);
+        $this->assertFalse($caseSensitiveFalse);
+        $this->assertTrue($caseInsensitive);
+    }
+
+    /**
      * @covers Str::toArray
      */
     public function testToArray()

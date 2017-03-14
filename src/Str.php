@@ -68,6 +68,25 @@ class Str
     }
 
     /**
+     * Checks if string contains another string.
+     *
+     * By default this method is case-sensitive.
+     *
+     * @param string $string
+     * @param string $search
+     * @param bool $caseSensitive
+     * @return bool
+     */
+    public static function contains(string $string, string $search, bool $caseSensitive = true): bool
+    {
+        if ($caseSensitive) {
+            return strpos($string, $search) !== false;
+        } else {
+            return stripos($string, $search) !== false;
+        }
+    }
+
+    /**
      * Splits a string into an array containing each character.
      *
      * @param string $string
