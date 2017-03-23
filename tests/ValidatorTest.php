@@ -343,6 +343,10 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $str_equals = ['equals' => 'Hello, World!'];
         $str_in = ['in' => ['hello', 'world', 'foo', 'bar']];
         $str_regex = ['regex' => "/php/i"];
+        $str_starts_with = ['starts_with' => 'Hello'];
+        $str_ends_with = ['ends_with' => 'World!'];
+        $str_contains = ['contains' => 'llo, W'];
+        $str_case_insensitive = ['case_sensitive' => false];
 
         $this->assertTrue(Validator::isString('abc', array_merge($str_min_length, $str_max_length)));
         $this->assertFalse(Validator::isString('', $str_min_length));
@@ -352,11 +356,21 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Validator::isString(null));
         $this->assertTrue(Validator::isString(null, $str_allow_null));
         $this->assertTrue(Validator::isString('Hello, World!', $str_equals));
+        $this->assertTrue(Validator::isString('hello, world!', array_merge($str_case_insensitive, $str_equals)));
         $this->assertFalse(Validator::isString('Hello World!', $str_equals));
         $this->assertTrue(Validator::isString('foo', $str_in));
         $this->assertFalse(Validator::isString('cat', $str_in));
         $this->assertTrue(Validator::isString('PHP is my favorite!', $str_regex));
         $this->assertFalse(Validator::isString('Java is my favorite!', $str_regex));
+        $this->assertTrue(Validator::isString('Hello, World!', $str_starts_with));
+        $this->assertTrue(Validator::isString('hello, world!', array_merge($str_case_insensitive, $str_starts_with)));
+        $this->assertFalse(Validator::isString('Jello, World!', $str_starts_with));
+        $this->assertTrue(Validator::isString('Hello, World!', $str_ends_with));
+        $this->assertTrue(Validator::isString('hello, world!', array_merge($str_case_insensitive, $str_ends_with)));
+        $this->assertFalse(Validator::isString('Hello, whorld!', $str_ends_with));
+        $this->assertTrue(Validator::isString('Hello, World!', $str_contains));
+        $this->assertTrue(Validator::isString('hello, world!', array_merge($str_case_insensitive, $str_contains)));
+        $this->assertFalse(Validator::isString('Hell0, World!', $str_contains));
     }
 
     /**

@@ -626,12 +626,27 @@ class Validator
     {
         $valid = is_string($value);
 
+        // case-sensitive by default
+        $caseSensitive = isset($rule['case_sensitive']) ? (bool) $rule['case_sensitive'] : true;
+
         if (isset($rule['equals']) && is_string($rule['equals'])) {
-            $valid = $valid && $value == $rule['equals'];
+            $valid = $valid && Str::equals($value, $rule['equals'], $caseSensitive);
         } elseif (isset($rule['in']) && is_array($rule['in'])) {
             $valid = $valid && in_array($value, $rule['in']);
         } elseif (isset($rule['regex']) && is_string($rule['regex'])) {
             $valid = $valid && preg_match($rule['regex'], $value);
+        }
+
+        if (isset($rule['starts_with']) && is_string($rule['starts_with'])) {
+            $valid = $valid && Str::startsWith($value, $rule['starts_with'], $caseSensitive);
+        }
+
+        if (isset($rule['ends_with']) && is_string($rule['ends_with'])) {
+            $valid = $valid && Str::endsWith($value, $rule['ends_with'], $caseSensitive);
+        }
+
+        if (isset($rule['contains']) && is_string($rule['contains'])) {
+            $valid = $valid && Str::contains($value, $rule['contains'], $caseSensitive);
         }
 
         if (isset($rule['allow_empty']) && $rule['allow_empty'] === false) {
