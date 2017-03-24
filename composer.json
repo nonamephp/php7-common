@@ -7,9 +7,13 @@
         {
             "name": "Clint Tyler",
             "email": "ctyler@cdtwebsolutions.com"
+        },
+        {
+            "name": "Jared Ivory",
+            "email": "iamface@jaredivory.com"
         }
     ],
-    "keywords": ["noname", "nonamephp", "common", "collection", "validator", "array"],
+    "keywords": ["noname", "php7", "common", "collection", "validator", "array", "string"],
     "homepage": "https://github.com/nonamephp/php7-common",
     "require": {
         "php": ">=7.0"
