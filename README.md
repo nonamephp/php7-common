@@ -1,6 +1,8 @@
 [![Build
 Status](https://travis-ci.org/nonamephp/php7-common.svg?branch=master)](https://travis-ci.org/nonamephp/php7-common)
 
+This project has been moved to https://github.com/cdtwebsolutions/noname-common - Please update your projects accordingly. 
+
 php7-common 
 =============
 
