@@ -38,6 +38,7 @@ namespace Noname\Common;
  * @method static bool isStream(mixed $value, array $rule = []) Checks if value is resource
  * @method static bool isDir(mixed $value, array $rule = []) Checks if value is directory
  * @method static bool isDirectory(mixed $value, array $rule = []) Checks if value is directory
+ * @method static bool isFile(mixed $value, array $rule = []) Checks if value is file
  */
 class Validator
 {
@@ -252,6 +253,10 @@ class Validator
         $this->addType('dir', [
             'alias' => 'directory',
             'validator' => [$this, 'validateDir']
+        ]);
+
+        $this->addType('file', [
+            'validator' => [$this, 'validateFile']
         ]);
     }
 
@@ -936,6 +941,32 @@ class Validator
         } elseif ($valid && isset($rule['is_writable']) && $rule['is_writable'] == false) {
             if (is_writeable($value)) {
                 $this->setError($rule['name'], "Directory ($value) must not be writable.");
+                return true;
+            }
+        }
+
+        return $valid;
+    }
+
+    /**
+     * Validate the $value is a valid file.
+     *
+     * @param $value
+     * @param array $rule
+     * @return bool
+     */
+    protected function validateFile($value, array $rule = []): bool
+    {
+        $valid = is_file($value);
+
+        if ($valid && isset($rule['is_writable']) && $rule['is_writable'] == true) {
+            if (!is_writeable($value)) {
+                $this->setError($rule['name'], "File ($value) must be writable.");
+                return true;
+            }
+        } elseif ($valid && isset($rule['is_writable']) && $rule['is_writable'] == false) {
+            if (is_writeable($value)) {
+                $this->setError($rule['name'], "File ($value) must not be writable.");
                 return true;
             }
         }
