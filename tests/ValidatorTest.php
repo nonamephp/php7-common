@@ -3,6 +3,8 @@ namespace Noname\Common;
 
 class ValidatorTest extends \PHPUnit_Framework_TestCase
 {
+    protected $dir;
+    protected $file;
     protected $resource;
     protected $nullValues;
     protected $booleanValues;
@@ -30,6 +32,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         // Create resource/stream
+        $this->dir = __DIR__ . '/fixtures';
+        $this->file = $this->dir . '/resource.txt';
         $this->resource = fopen(__DIR__ . '/fixtures/resource.txt', 'r');
 
         // Set values for each data type
@@ -739,6 +743,43 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 Validator::isDateTime($value, ['format' => $format])
             );
         }
+    }
+
+    /**
+     * @covers Validator::validateResource
+     */
+    public function testValidateResource()
+    {
+        $this->assertTrue(Validator::isResource($this->resource));
+        $this->assertTrue(Validator::isResource($this->resource, ['resource_type' => 'stream']));
+    }
+
+    /**
+     * @covers Validator::validateStream
+     */
+    public function testValidateStream()
+    {
+        $this->assertTrue(Validator::isStream($this->resource));
+    }
+
+    /**
+     * @covers Validator::validateDir
+     */
+    public function testValidateDir()
+    {
+        $this->assertTrue(Validator::isDir($this->dir));
+        $this->assertTrue(Validator::isDir($this->dir, ['is_writable' => true]));
+        $this->assertFalse(Validator::isDir($this->dir, ['is_writable' => false]));
+    }
+
+    /**
+     * @covers Validator::validateFile
+     */
+    public function testValidateFile()
+    {
+        $this->assertTrue(Validator::isFile($this->file));
+        $this->assertTrue(Validator::isFile($this->file, ['is_writable' => true]));
+        $this->assertFalse(Validator::isFile($this->file, ['is_writable' => false]));
     }
 
     /**

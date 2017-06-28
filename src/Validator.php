@@ -34,6 +34,11 @@ namespace Noname\Common;
  * @method static bool isIPv6(mixed $value, array $rule = []) Checks if value is valid IPv6
  * @method static bool isDate(mixed $value, array $rule = []) Checks if value is date/datetime
  * @method static bool isDateTime(mixed $value, array $rule = []) Checks if value is date/datetime
+ * @method static bool isResource(mixed $value, array $rule = []) Checks if value is resource
+ * @method static bool isStream(mixed $value, array $rule = []) Checks if value is resource
+ * @method static bool isDir(mixed $value, array $rule = []) Checks if value is directory
+ * @method static bool isDirectory(mixed $value, array $rule = []) Checks if value is directory
+ * @method static bool isFile(mixed $value, array $rule = []) Checks if value is file
  */
 class Validator
 {
@@ -234,6 +239,24 @@ class Validator
         $this->addType('date', [
             'alias' => 'datetime',
             'validator' => [$this, 'validateDateTime']
+        ]);
+
+        $this->addType('resource', [
+            'validator' => [$this, 'validateResource']
+        ]);
+
+        $this->addType('stream', [
+            'extends' => 'resource',
+            'validator' => [$this, 'validateStream']
+        ]);
+
+        $this->addType('dir', [
+            'alias' => 'directory',
+            'validator' => [$this, 'validateDir']
+        ]);
+
+        $this->addType('file', [
+            'validator' => [$this, 'validateFile']
         ]);
     }
 
@@ -863,5 +886,91 @@ class Validator
         }
 
         return true;
+    }
+
+    /**
+     * Validate that $value is a valid resource.
+     *
+     * @param mixed $value
+     * @param array $rule
+     * @return bool
+     */
+    protected function validateResource($value, array $rule = []): bool
+    {
+        $valid = is_resource($value);
+
+        if ($valid && isset($rule['resource_type']) && is_string($rule['resource_type'])) {
+            $valid = Str::equals(get_resource_type($value), $rule['resource_type'], false);
+            if (!$valid) {
+                $this->setError($rule['name'], "Value ($value) failed to validate as resource type of '{$rule['resource_type']}'");
+                return true;
+            }
+        }
+
+        return $valid;
+    }
+
+    /**
+     * Validate that $value is a valid stream.
+     *
+     * @param mixed $value
+     * @param array $rule
+     * @return bool
+     */
+    protected function validateStream($value, array $rule = []): bool
+    {
+        return is_resource($value) && get_resource_type($value) == 'stream';
+    }
+
+    /**
+     * Validate the $value is a valid directory.
+     *
+     * @param $value
+     * @param array $rule
+     * @return bool
+     */
+    protected function validateDir($value, array $rule = []): bool
+    {
+        $valid = is_dir($value);
+
+        if ($valid && isset($rule['is_writable']) && $rule['is_writable'] == true) {
+            if (!is_writeable($value)) {
+                $this->setError($rule['name'], "Directory ($value) must be writable.");
+                return true;
+            }
+        } elseif ($valid && isset($rule['is_writable']) && $rule['is_writable'] == false) {
+            if (is_writeable($value)) {
+                $this->setError($rule['name'], "Directory ($value) must not be writable.");
+                return true;
+            }
+        }
+
+        return $valid;
+    }
+
+    /**
+     * Validate the $value is a valid file.
+     *
+     * @param $value
+     * @param array $rule
+     * @return bool
+     */
+    protected function validateFile($value, array $rule = []): bool
+    {
+        $valid = is_file($value);
+
+        if ($valid && isset($rule['is_writable']) && $rule['is_writable'] == true) {
+            if (!is_writeable($value)) {
+                $this->setError($rule['name'], "File ($value) must be writable.");
+                return true;
+            }
+        } elseif ($valid && isset($rule['is_writable']) && $rule['is_writable'] == false) {
+            if (is_writeable($value)) {
+                $this->setError($rule['name'], "File ($value) must not be writable.");
+                return true;
+            }
+        }
+
+        return $valid;
     }
 }
