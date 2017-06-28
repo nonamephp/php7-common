@@ -231,6 +231,10 @@ if ($valid) {
 * `ipv4` Validate that value is IPv4
 * `ipv6` Validate that value is IPv6
 * `date`, `datetime` Validate that value is date/datetime
+* `resource` Validate that value is a resource
+* `stream` Validate that value is a stream
+* `dir`, `directory` Validate that value is a directory
+* `file` Validate that value is a file
 
 **Hint:** Adding `[]` to any type (e.g. `int[]`) will validate an array of values.
 
