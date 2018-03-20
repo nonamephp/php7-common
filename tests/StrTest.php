@@ -1,7 +1,9 @@
-<?php declare(strict_types = 1);
-namespace Noname\Common;
+<?php declare(strict_types=1);
+namespace Noname;
 
-class StrTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class StrTest extends TestCase
 {
     /**
      * @covers Str::testStartsWith

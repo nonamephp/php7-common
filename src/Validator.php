@@ -1,11 +1,10 @@
 <?php declare(strict_types = 1);
-namespace Noname\Common;
+namespace Noname;
 
 /**
  * Validator
  *
- * @package Noname\Common
- * @since 0.2.0
+ * @package Noname
  *
  * @method static bool is(string $type, mixed $value, array $rule = []) Checks if value passes as type
  * @method static bool isAny(mixed $value, array $rule = []) Always returns true
@@ -400,8 +399,11 @@ class Validator
                 // Add key/name to $rule
                 $rule['name'] = $name;
 
-                // Check if value exists in dataset
-                if ($value = $this->values->get($rule['name'], false)) {
+                // Check if value exists
+                if ($this->values->has($rule['name'])) {
+                    // Set value
+                    $value = $this->values->get($rule['name']);
+
                     // Validate type
                     if (!$this->validateType($rule['type'], $value, $rule)) {
                         // Value didn't pass validation; Process next rule.

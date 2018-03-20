@@ -1,7 +1,9 @@
 <?php declare(strict_types=1);
-namespace Noname\Common;
+namespace Noname;
 
-class ArrTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class ArrTest extends TestCase
 {
     /**
      * @covers Arr::flatten, Arr::dot

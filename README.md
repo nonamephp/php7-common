@@ -4,7 +4,7 @@ Status](https://travis-ci.org/nonamephp/php7-common.svg?branch=master)](https://
 php7-common 
 =============
 
-A collection of common libraries for PHP 7.
+A collection of common libraries for PHP 7.1+.
 
 ## Installation
 
@@ -14,12 +14,12 @@ Use Composer to install `php7-common` into your project.
 
 ## Included Libraries
 
-* `Noname\Common\Arr`
-* `Noname\Common\Collection`
-* `Noname\Common\Str`
-* `Noname\Common\Validator`
+* `Noname\Arr`
+* `Noname\Collection`
+* `Noname\Str`
+* `Noname\Validator`
 
-### `\Noname\Common\Arr`
+### `\Noname\Arr`
 
 A helper library for working with arrays.
 
@@ -39,7 +39,7 @@ Recursively assign the callable's return value to each array item. Array keys ar
 
 ```php
 <?php
-use Noname\Common\Arr;
+use Noname\Arr;
 
 $values = [1, 2, 3, 4, 5];
 
@@ -49,7 +49,7 @@ $values_doubled = Arr::each($values, function ($value) {
 });
 ```
 
-### `\Noname\Common\Collection`
+### `\Noname\Collection`
 
 Create a `Collection` with an associative array to provide helpful methods for working with your data.
 
@@ -59,7 +59,7 @@ Create a `Collection` with an associative array to provide helpful methods for w
 
 ```php
 <?php
-use Noname\Common\Collection;
+use Noname\Collection;
 
 $userData = [
     'user_id' => 100,
@@ -148,7 +148,7 @@ Returns collection as JSON.
 
 Flatten all of the items in the collection using dot (.) notation.
 
-### `\Noname\Common\Str`
+### `\Noname\Str`
 
 A helper library for working with strings.
 
@@ -174,7 +174,7 @@ Checks if string contains another string. By default this method is case-sensiti
 
 Splits a string into an array containing each character.
 
-### \Noname\Common\Validator
+### \Noname\Validator
 
 Use `Validator` to validate your data based on a set of rules.
 
@@ -182,7 +182,7 @@ Use `Validator` to validate your data based on a set of rules.
 
 ```php
 <?php
-use Noname\Common\Validator;
+use Noname\Validator;
 
 // Data to be validated
 $data = [
@@ -250,7 +250,7 @@ Add a custom validator type. The following example will add a type of `equals_2`
 
 ```php
 <?php
-use Noname\Common\Validator;
+use Noname\Validator;
 
 // Data to be validated
 $values = ['a' => 3];
@@ -330,7 +330,7 @@ This method is useful when validating a single value.
 
 ```php
 <?php
-use Noname\Common\Validator;
+use Noname\Validator;
 
 Validator::is('string', 'Hello world!'); // @return true
 Validator::is('integer', 'Hello world!'); // @return false
@@ -342,7 +342,7 @@ Similar to `is()`, except type is passed in the method name.
 
 ```php
 <?php
-use Noname\Common\Validator;
+use Noname\Validator;
 
 Validator::isString('Hello world!'); // @return true
 Validator::isInteger('Hello world!'); // @return false

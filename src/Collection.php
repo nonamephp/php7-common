@@ -1,5 +1,5 @@
 <?php declare(strict_types = 1);
-namespace Noname\Common;
+namespace Noname;
 
 use ArrayAccess;
 use Countable;
@@ -10,7 +10,7 @@ use JsonSerializable;
 /**
  * Collection
  *
- * @package Noname\Common
+ * @package Noname
  */
 class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializable, JsonSerializable
 {
@@ -164,7 +164,8 @@ class Collection implements Countable, ArrayAccess, IteratorAggregate, Serializa
      */
     public function has($key): bool
     {
-        return isset($this->items[$key]);
+        $hasKey = array_key_exists($key, $this->items);
+        return $hasKey || isset($this->items[$key]);
     }
 
     /**

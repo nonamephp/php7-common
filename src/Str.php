@@ -1,10 +1,10 @@
 <?php declare(strict_types = 1);
-namespace Noname\Common;
+namespace Noname;
 
 /**
  * Class Str
  *
- * @package Noname\Common
+ * @package Noname
  */
 class Str
 {

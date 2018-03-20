@@ -1,10 +1,10 @@
 <?php declare(strict_types = 1);
-namespace Noname\Common;
+namespace Noname;
 
 /**
  * Class Arr
  *
- * @package Noname\Common
+ * @package Noname
  */
 class Arr
 {
